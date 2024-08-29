@@ -14,9 +14,6 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/habit-
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the 'dist' directory
-app.use(express.static(path.join(__dirname, 'dist')));
-
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -24,13 +21,20 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
+// API routes
 app.use('/api/habits', habitRoutes);
 app.use('/api/auth', authRoutes);
 
-// Catch-all route to serve the index.html for any unmatched routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+// Serve static files and handle SPA routing only in production
+if (process.env.NODE_ENV === 'production') {
+  // Adjust the path to point to the frontend/dist directory
+  app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+
+  // Catch-all route for SPA
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
