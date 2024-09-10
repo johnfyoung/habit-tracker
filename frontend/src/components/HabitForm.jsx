@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
 `;
 
 const Input = styled.input`
@@ -36,12 +40,14 @@ const Button = styled.button`
 function HabitForm({ addHabit }) {
   const [name, setName] = useState('');
   const [frequency, setFrequency] = useState('daily');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addHabit({ name, frequency });
+    await addHabit({ name, frequency });
     setName('');
     setFrequency('daily');
+    navigate('/habits');
   };
 
   return (

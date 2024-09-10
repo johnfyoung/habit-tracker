@@ -4,22 +4,28 @@ import axios from 'axios';
 import styled from 'styled-components';
 import HabitList from './components/HabitList';
 import HabitForm from './components/HabitForm';
+import HabitCalendar from './components/HabitCalendar';
 import Register from './components/Register';
 import Login from './components/Login';
+import NavBar from './components/NavBar';
+import Alert from './components/Alert';
 import GlobalStyles from './GlobalStyles';
 
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: 'Arial', sans-serif;
 `;
 
-const Banner = styled.div`
+const Banner = styled.header`
   background-color: #2196f3;
   color: white;
   padding: 1rem;
-  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.h1`
@@ -29,20 +35,21 @@ const Title = styled.h1`
 const ContentWrapper = styled.div`
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem;
 `;
 
-const Content = styled.div`
+const Content = styled.main`
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
 `;
 
 function App() {
   const [habits, setHabits] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [alert, setAlert] = useState({ message: '', type: '' });
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -85,8 +92,10 @@ function App() {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchHabits();
+      showAlert('Habit added successfully!', 'success');
     } catch (error) {
       console.error('Error adding habit:', error);
+      showAlert('Failed to add habit', 'error');
     }
   };
 
@@ -119,6 +128,11 @@ function App() {
     setHabits([]);
   };
 
+  const showAlert = (message, type) => {
+    setAlert({ message, type });
+    setTimeout(() => setAlert({ message: '', type: '' }), 5000); // Hide alert after 5 seconds
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -128,8 +142,10 @@ function App() {
       <GlobalStyles />
       <AppContainer>
         <Banner>
-          <Title>Habit Tracker</Title>
+          <Title>Get It Done</Title>
+          {isAuthenticated && <NavBar onLogout={handleLogout} />}
         </Banner>
+        {alert.message && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ message: '', type: '' })} />}
         <ContentWrapper>
           <Content>
             <Routes>
@@ -139,11 +155,27 @@ function App() {
                 path="/habits" 
                 element={
                   isAuthenticated ? (
-                    <>
-                      <HabitForm addHabit={addHabit} />
-                      <HabitList habits={habits} onHabitTracked={handleHabitTracked} />
-                      <button onClick={handleLogout}>Logout</button>
-                    </>
+                    <HabitList habits={habits} onHabitTracked={handleHabitTracked} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/add-habit" 
+                element={
+                  isAuthenticated ? (
+                    <HabitForm addHabit={addHabit} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/habit/:id" 
+                element={
+                  isAuthenticated ? (
+                    <HabitCalendar habits={habits} setHabits={setHabits} />
                   ) : (
                     <Navigate to="/login" replace />
                   )
