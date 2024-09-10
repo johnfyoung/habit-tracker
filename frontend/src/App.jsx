@@ -163,6 +163,16 @@ function App() {
                 } 
               />
               <Route 
+                path="/add-habit" 
+                element={
+                  isAuthenticated ? (
+                    <HabitForm addHabit={addHabit} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
                 path="/habit/:id" 
                 element={
                   isAuthenticated ? (
