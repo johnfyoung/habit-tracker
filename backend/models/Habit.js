@@ -9,7 +9,11 @@ const habitSchema = new mongoose.Schema({
     get: function(date) {
       return date ? date.toISOString().split('T')[0] : null;
     }
-  }]
+  }],
+  archived: {
+    type: Boolean,
+    default: false
+  }
 }, { 
   timestamps: { currentTime: () => new Date().toUTCString() } 
 });

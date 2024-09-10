@@ -73,6 +73,26 @@ const HabitTitle = styled.h2`
   margin-bottom: 20px;
 `;
 
+const ArchiveButton = styled.button`
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+
+  &:hover {
+    background-color: #d32f2f;
+  }
+`;
+
+const ArchivedNotice = styled.p`
+  color: #f44336;
+  font-style: italic;
+  margin-top: 10px;
+`;
+
 function HabitCalendar({ habits, setHabits }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -92,6 +112,10 @@ function HabitCalendar({ habits, setHabits }) {
   };
 
   const toggleHabitCompletion = async (value) => {
+    if (habit.archived) {
+      return; // Do nothing if the habit is archived
+    }
+
     const clickedDate = value.toISOString().split('T')[0];
     
     try {
@@ -109,15 +133,38 @@ function HabitCalendar({ habits, setHabits }) {
     }
   };
 
+  const handleArchiveToggle = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`/api/habits/${habit._id}/toggle-archive`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedHabit = response.data;
+      setHabits(habits.map(h => h._id === habit._id ? updatedHabit : h));
+      if (updatedHabit.archived) {
+        navigate('/habits');
+      }
+    } catch (error) {
+      console.error('Error toggling archive status:', error);
+    }
+  };
+
   return (
     <CalendarContainer>
       <BackButton onClick={() => navigate('/habits')}>Back to Habits</BackButton>
       <HabitTitle>{habit.name}</HabitTitle>
+      {habit.archived && (
+        <ArchivedNotice>This habit is archived. Unarchive to enable tracking.</ArchivedNotice>
+      )}
       <StyledCalendar
         onChange={toggleHabitCompletion}
         value={date}
         tileClassName={tileClassName}
+        tileDisabled={({date, view}) => habit.archived && view === 'month'}
       />
+      <ArchiveButton onClick={handleArchiveToggle}>
+        {habit.archived ? 'Unarchive' : 'Archive'} Habit
+      </ArchiveButton>
     </CalendarContainer>
   );
 }

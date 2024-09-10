@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import HabitList from './components/HabitList';
 import HabitForm from './components/HabitForm';
 import HabitCalendar from './components/HabitCalendar';
+import HabitArchive from './components/HabitArchive';
 import Register from './components/Register';
 import Login from './components/Login';
 import NavBar from './components/NavBar';
@@ -155,17 +156,7 @@ function App() {
                 path="/habits" 
                 element={
                   isAuthenticated ? (
-                    <HabitList habits={habits} onHabitTracked={handleHabitTracked} />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                } 
-              />
-              <Route 
-                path="/add-habit" 
-                element={
-                  isAuthenticated ? (
-                    <HabitForm addHabit={addHabit} />
+                    <HabitList habits={habits.filter(h => !h.archived)} setHabits={setHabits} onHabitTracked={handleHabitTracked} />
                   ) : (
                     <Navigate to="/login" replace />
                   )
@@ -176,6 +167,16 @@ function App() {
                 element={
                   isAuthenticated ? (
                     <HabitCalendar habits={habits} setHabits={setHabits} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/archive" 
+                element={
+                  isAuthenticated ? (
+                    <HabitArchive habits={habits} setHabits={setHabits} />
                   ) : (
                     <Navigate to="/login" replace />
                   )

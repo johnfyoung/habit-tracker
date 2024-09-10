@@ -80,4 +80,18 @@ router.post('/:id/toggle', auth, async (req, res) => {
   }
 });
 
+router.post('/:id/toggle-archive', auth, async (req, res) => {
+  try {
+    const habit = await Habit.findById(req.params.id);
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
+    }
+    habit.archived = !habit.archived;
+    await habit.save();
+    res.json(habit);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

@@ -41,14 +41,22 @@ const HabitItemContent = styled.div`
   cursor: pointer;
 `;
 
-function HabitTask({ habit, onHabitTracked, isCompleted, lastCompletedDate }) {
+const ArchiveButton = styled.button`
+  background: none;
+  border: none;
+  color: #757575;
+  cursor: pointer;
+  margin-left: 10px;
+  &:hover {
+    color: #2196f3;
+  }
+`;
+
+function HabitTask({ habit, onHabitTracked, isCompleted, lastCompletedDate, isArchived }) {
   const navigate = useNavigate();
 
-  const handleClick = (e) => {
-    // Prevent navigation if the click was on the checkbox
-    if (e.target.type !== 'checkbox') {
-      navigate(`/habit/${habit._id}`);
-    }
+  const handleClick = () => {
+    navigate(`/habit/${habit._id}`);
   };
 
   return (
@@ -62,14 +70,16 @@ function HabitTask({ habit, onHabitTracked, isCompleted, lastCompletedDate }) {
           )}
         </HabitInfo>
       </HabitItemContent>
-      <Checkbox 
-        type="checkbox"
-        checked={isCompleted}
-        onChange={(e) => {
-          e.stopPropagation();
-          onHabitTracked(habit._id);
-        }}
-      />
+      {!isArchived && (
+        <Checkbox 
+          type="checkbox"
+          checked={isCompleted}
+          onChange={(e) => {
+            e.stopPropagation();
+            onHabitTracked(habit._id);
+          }}
+        />
+      )}
     </HabitItem>
   );
 }

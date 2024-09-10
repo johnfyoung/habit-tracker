@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import HabitTask from './HabitTask';
+import axios from 'axios';
 
 const HabitListContainer = styled.div`
   margin-top: 2rem;
@@ -16,7 +17,7 @@ const Section = styled.div`
   margin-bottom: 2rem;
 `;
 
-function HabitList({ habits, onHabitTracked }) {
+function HabitList({ habits, setHabits, onHabitTracked }) {
   const isHabitCompleted = (habit) => {
     if (!habit.completedDates || habit.completedDates.length === 0) {
       return false;
@@ -58,14 +59,22 @@ function HabitList({ habits, onHabitTracked }) {
     return date.toLocaleDateString('en-US', { timeZone: 'UTC' });
   };
 
-  const todoHabits = habits.filter(habit => !isHabitCompleted(habit));
-  const completedHabits = habits
-    .filter(habit => isHabitCompleted(habit))
-    .sort((a, b) => {
-      const dateA = getLastCompletedDate(a.completedDates);
-      const dateB = getLastCompletedDate(b.completedDates);
-      return dateB - dateA; // Sort in descending order (most recent first)
-    });
+  const handleArchiveToggle = async (habitId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`/api/habits/${habitId}/toggle-archive`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedHabit = response.data;
+      setHabits(habits.map(h => h._id === habitId ? updatedHabit : h));
+    } catch (error) {
+      console.error('Error toggling archive status:', error);
+    }
+  };
+
+  const activeHabits = habits.filter(habit => !habit.archived);
+  const todoHabits = activeHabits.filter(habit => !isHabitCompleted(habit));
+  const completedHabits = activeHabits.filter(habit => isHabitCompleted(habit));
 
   return (
     <HabitListContainer>
@@ -78,6 +87,7 @@ function HabitList({ habits, onHabitTracked }) {
             onHabitTracked={onHabitTracked}
             isCompleted={false}
             lastCompletedDate={null}
+            onArchiveToggle={handleArchiveToggle}
           />
         ))}
       </Section>
@@ -92,6 +102,7 @@ function HabitList({ habits, onHabitTracked }) {
               onHabitTracked={onHabitTracked}
               isCompleted={true}
               lastCompletedDate={lastCompletedDate ? formatDate(lastCompletedDate) : null}
+              onArchiveToggle={handleArchiveToggle}
             />
           );
         })}
