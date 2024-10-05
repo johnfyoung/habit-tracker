@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import styled from "styled-components";
 
 const NavBarContainer = styled.nav`
   display: flex;
@@ -20,7 +20,7 @@ const HamburgerButton = styled.button`
 const MobileMenu = styled.div`
   position: fixed;
   top: 0;
-  right: ${props => props.show ? '0' : '-100%'};
+  right: ${(props) => (props.$show ? "0" : "-100%")};
   width: 100%;
   height: 100vh;
   background-color: #2196f3;
@@ -72,13 +72,30 @@ function NavBar({ onLogout }) {
   return (
     <NavBarContainer>
       <HamburgerButton onClick={toggleMobileMenu}>
-        {showMobileMenu ? '✕' : '☰'}
+        {showMobileMenu ? "✕" : "☰"}
       </HamburgerButton>
-      <MobileMenu show={showMobileMenu}>
-        <NavButton to="/habits" onClick={toggleMobileMenu}>Habits</NavButton>
-        <NavButton to="/add-habit" onClick={toggleMobileMenu}>Add Habit</NavButton>
-        <NavButton to="/archive" onClick={toggleMobileMenu}>Archive</NavButton>
-        <LogoutButton onClick={() => { onLogout(); toggleMobileMenu(); }}>Logout</LogoutButton>
+      <MobileMenu $show={showMobileMenu}>
+        <NavButton to="/habits" onClick={toggleMobileMenu}>
+          Habits
+        </NavButton>
+        <NavButton to="/profile" onClick={toggleMobileMenu}>
+          Profile
+        </NavButton>{" "}
+        {/* Link to the profile page */}
+        <NavButton to="/add-habit" onClick={toggleMobileMenu}>
+          Add Habit
+        </NavButton>
+        <NavButton to="/archive" onClick={toggleMobileMenu}>
+          Archive
+        </NavButton>
+        <LogoutButton
+          onClick={() => {
+            onLogout();
+            toggleMobileMenu();
+          }}
+        >
+          Logout
+        </LogoutButton>
       </MobileMenu>
     </NavBarContainer>
   );

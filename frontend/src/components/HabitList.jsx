@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import HabitTask from './HabitTask';
-import axios from 'axios';
+import React from "react";
+import styled from "styled-components";
+import HabitTask from "./HabitTask";
+import { authApi } from "../utils/api";
 
 const HabitListContainer = styled.div`
   margin-top: 2rem;
@@ -24,24 +24,36 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
     }
 
     const today = new Date();
-    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-    const todayString = todayUTC.toISOString().split('T')[0];
+    const todayUTC = new Date(
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+    );
+    const todayString = todayUTC.toISOString().split("T")[0];
 
     switch (habit.frequency.toLowerCase()) {
-      case 'daily':
-        return habit.completedDates.some(date => {
-          const dateUTC = new Date(date + 'T00:00:00Z');
-          const dateString = dateUTC.toISOString().split('T')[0];
+      case "daily":
+        return habit.completedDates.some((date) => {
+          const dateUTC = new Date(date + "T00:00:00Z");
+          const dateString = dateUTC.toISOString().split("T")[0];
           return dateString === todayString;
         });
-      case 'weekly':
-        const weekStartUTC = new Date(Date.UTC(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate() - todayUTC.getUTCDay()));
-        return habit.completedDates.some(date => new Date(date + 'T00:00:00Z') >= weekStartUTC);
-      case 'monthly':
-        return habit.completedDates.some(date => {
-          const completedDateUTC = new Date(date + 'T00:00:00Z');
-          return completedDateUTC.getUTCMonth() === todayUTC.getUTCMonth() &&
-                 completedDateUTC.getUTCFullYear() === todayUTC.getUTCFullYear();
+      case "weekly":
+        const weekStartUTC = new Date(
+          Date.UTC(
+            todayUTC.getUTCFullYear(),
+            todayUTC.getUTCMonth(),
+            todayUTC.getUTCDate() - todayUTC.getUTCDay()
+          )
+        );
+        return habit.completedDates.some(
+          (date) => new Date(date + "T00:00:00Z") >= weekStartUTC
+        );
+      case "monthly":
+        return habit.completedDates.some((date) => {
+          const completedDateUTC = new Date(date + "T00:00:00Z");
+          return (
+            completedDateUTC.getUTCMonth() === todayUTC.getUTCMonth() &&
+            completedDateUTC.getUTCFullYear() === todayUTC.getUTCFullYear()
+          );
         });
       default:
         return false;
@@ -52,29 +64,32 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
     if (!completedDates || completedDates.length === 0) {
       return null;
     }
-    return new Date(Math.max(...completedDates.map(d => new Date(d + 'T00:00:00Z').getTime())));
+    return new Date(
+      Math.max(
+        ...completedDates.map((d) => new Date(d + "T00:00:00Z").getTime())
+      )
+    );
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { timeZone: 'UTC' });
+    return date.toLocaleDateString("en-US", { timeZone: "UTC" });
   };
 
   const handleArchiveToggle = async (habitId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`/api/habits/${habitId}/toggle-archive`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authApi.post(`/habits/${habitId}/toggle-archive`);
       const updatedHabit = response.data;
-      setHabits(habits.map(h => h._id === habitId ? updatedHabit : h));
+      setHabits(habits.map((h) => (h._id === habitId ? updatedHabit : h)));
     } catch (error) {
-      console.error('Error toggling archive status:', error);
+      console.error("Error toggling archive status:", error);
     }
   };
 
-  const activeHabits = habits.filter(habit => !habit.archived);
-  const todoHabits = activeHabits.filter(habit => !isHabitCompleted(habit));
-  const completedHabits = activeHabits.filter(habit => isHabitCompleted(habit));
+  const activeHabits = habits.filter((habit) => !habit.archived);
+  const todoHabits = activeHabits.filter((habit) => !isHabitCompleted(habit));
+  const completedHabits = activeHabits.filter((habit) =>
+    isHabitCompleted(habit)
+  );
 
   return (
     <HabitListContainer>
@@ -101,7 +116,9 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
               habit={habit}
               onHabitTracked={onHabitTracked}
               isCompleted={true}
-              lastCompletedDate={lastCompletedDate ? formatDate(lastCompletedDate) : null}
+              lastCompletedDate={
+                lastCompletedDate ? formatDate(lastCompletedDate) : null
+              }
               onArchiveToggle={handleArchiveToggle}
             />
           );

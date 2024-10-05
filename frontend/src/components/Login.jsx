@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import styled from 'styled-components';
-import Alert from './Alert';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { api } from "../utils/api";
+import styled from "styled-components";
+import Alert from "./Alert";
 
 const FormContainer = styled.div`
   display: flex;
@@ -55,8 +55,8 @@ const AlertWrapper = styled.div`
 `;
 
 function Login({ onLogin }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,19 +65,26 @@ function Login({ onLogin }) {
     if (location.state && location.state.alert) {
       setAlert(location.state.alert);
       // Clear the location state to prevent the alert from reappearing on refresh
-      window.history.replaceState({}, document.title)
+      window.history.replaceState({}, document.title);
     }
   }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/auth/login', { username, password });
-      localStorage.setItem('token', response.data.token);
+      const response = await api.post("/auth/login", {
+        username,
+        password,
+      });
+      console.log("Login response:", response.data); // Add this line for debugging
+      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       onLogin();
-      navigate('/habits');
+      navigate("/habits");
     } catch (error) {
-      setAlert({ message: 'Login failed. Please try again.', type: 'error' });
+      console.error("Login error:", error); // Add this line for debugging
+      setAlert({ message: "Login failed. Please try again.", type: "error" });
     }
   };
 

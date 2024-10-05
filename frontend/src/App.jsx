@@ -1,16 +1,22 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import axios from 'axios';
-import styled from 'styled-components';
-import HabitList from './components/HabitList';
-import HabitForm from './components/HabitForm';
-import HabitCalendar from './components/HabitCalendar';
-import HabitArchive from './components/HabitArchive';
-import Register from './components/Register';
-import Login from './components/Login';
-import NavBar from './components/NavBar';
-import Alert from './components/Alert';
-import GlobalStyles from './GlobalStyles';
+import { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { api, authApi } from "./utils/api";
+import styled from "styled-components";
+import HabitList from "./components/HabitList";
+import HabitForm from "./components/HabitForm";
+import HabitCalendar from "./components/HabitCalendar";
+import HabitArchive from "./components/HabitArchive";
+import Register from "./components/Register";
+import Login from "./components/Login";
+import UserProfile from "./components/UserProfile";
+import NavBar from "./components/NavBar";
+import Alert from "./components/Alert";
+import GlobalStyles from "./GlobalStyles";
 
 const AppContainer = styled.div`
   display: flex;
@@ -50,21 +56,22 @@ function App() {
   const [habits, setHabits] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [alert, setAlert] = useState({ message: '', type: '' });
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
+      console.log("Stored token:", token); // Add this line for debugging
       if (token) {
         try {
-          await axios.get('/api/auth/verify', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          await authApi.get("/auth/verify");
           setIsAuthenticated(true);
           fetchHabits();
         } catch (error) {
-          console.error('Token verification failed:', error);
-          localStorage.removeItem('token');
+          console.error("Token verification failed:", error);
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
         }
       }
       setIsLoading(false);
@@ -75,46 +82,39 @@ function App() {
 
   const fetchHabits = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/habits', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log('Fetched habits:', response.data);
+      const response = await authApi.get("/habits");
+      console.log("Fetched habits:", response.data);
       setHabits(response.data);
     } catch (error) {
-      console.error('Error fetching habits:', error);
+      console.error("Error fetching habits:", error);
     }
   };
 
   const addHabit = async (habit) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/habits', habit, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const userId = JSON.parse(localStorage.getItem("user")).id;
+      await authApi.post("/habits", { ...habit, userId });
       fetchHabits();
-      showAlert('Habit added successfully!', 'success');
+      showAlert("Habit added successfully!", "success");
     } catch (error) {
-      console.error('Error adding habit:', error);
-      showAlert('Failed to add habit', 'error');
+      console.error("Error adding habit:", error);
+      showAlert("Failed to add habit", "error");
     }
   };
 
   const handleHabitTracked = async (habitId) => {
     try {
-      const token = localStorage.getItem('token');
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       console.log(`Toggling habit ${habitId} for date ${today}`);
-      const response = await axios.post(`/api/habits/${habitId}/toggle`, 
-        { date: today },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await authApi.post(`/habits/${habitId}/toggle`, {
+        date: today,
+      });
+      console.log("Habit toggled:", response.data);
+      setHabits(
+        habits.map((habit) => (habit._id === habitId ? response.data : habit))
       );
-      console.log('Habit toggled:', response.data);
-      setHabits(habits.map(habit => 
-        habit._id === habitId ? response.data : habit
-      ));
     } catch (error) {
-      console.error('Error toggling habit:', error);
+      console.error("Error toggling habit:", error);
     }
   };
 
@@ -124,14 +124,16 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
     setHabits([]);
   };
 
   const showAlert = (message, type) => {
     setAlert({ message, type });
-    setTimeout(() => setAlert({ message: '', type: '' }), 5000); // Hide alert after 5 seconds
+    setTimeout(() => setAlert({ message: "", type: "" }), 5000); // Hide alert after 5 seconds
   };
 
   if (isLoading) {
@@ -146,51 +148,71 @@ function App() {
           <Title>Get It Done</Title>
           {isAuthenticated && <NavBar onLogout={handleLogout} />}
         </Banner>
-        {alert.message && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ message: '', type: '' })} />}
+        {alert.message && (
+          <Alert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ message: "", type: "" })}
+          />
+        )}
         <ContentWrapper>
           <Content>
             <Routes>
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login onLogin={handleLogin} />} />
-              <Route 
-                path="/habits" 
+              <Route
+                path="/habits"
                 element={
                   isAuthenticated ? (
-                    <HabitList habits={habits.filter(h => !h.archived)} setHabits={setHabits} onHabitTracked={handleHabitTracked} />
+                    <HabitList
+                      habits={habits.filter((h) => !h.archived)}
+                      setHabits={setHabits}
+                      onHabitTracked={handleHabitTracked}
+                    />
                   ) : (
                     <Navigate to="/login" replace />
                   )
-                } 
+                }
               />
-              <Route 
-                path="/add-habit" 
+              <Route
+                path="/add-habit"
                 element={
                   isAuthenticated ? (
                     <HabitForm addHabit={addHabit} />
                   ) : (
                     <Navigate to="/login" replace />
                   )
-                } 
+                }
               />
-              <Route 
-                path="/habit/:id" 
+              <Route
+                path="/habit/:id"
                 element={
                   isAuthenticated ? (
                     <HabitCalendar habits={habits} setHabits={setHabits} />
                   ) : (
                     <Navigate to="/login" replace />
                   )
-                } 
+                }
               />
-              <Route 
-                path="/archive" 
+              <Route
+                path="/archive"
                 element={
                   isAuthenticated ? (
                     <HabitArchive habits={habits} setHabits={setHabits} />
                   ) : (
                     <Navigate to="/login" replace />
                   )
-                } 
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  isAuthenticated ? (
+                    <UserProfile />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
               />
               <Route path="/" element={<Navigate to="/habits" replace />} />
             </Routes>
