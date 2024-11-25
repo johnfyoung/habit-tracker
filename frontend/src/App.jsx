@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -17,11 +17,13 @@ import UserProfile from "./components/UserProfile";
 import NavBar from "./components/NavBar";
 import Alert from "./components/Alert";
 import GlobalStyles from "./GlobalStyles";
+import LoadingScreen from "./components/LoadingScreen";
 
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #f5f5f5;
 `;
 
 const Banner = styled.header`
@@ -137,7 +139,7 @@ function App() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingScreen />;
   }
 
   return (

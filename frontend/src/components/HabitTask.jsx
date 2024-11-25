@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const HabitItem = styled.div`
   background-color: #ffffff;
@@ -34,6 +34,7 @@ const Checkbox = styled.input`
   width: 20px;
   height: 20px;
   cursor: pointer;
+  background-color: transparent;
 `;
 
 const HabitItemContent = styled.div`
@@ -52,7 +53,13 @@ const ArchiveButton = styled.button`
   }
 `;
 
-function HabitTask({ habit, onHabitTracked, isCompleted, lastCompletedDate, isArchived }) {
+function HabitTask({
+  habit,
+  onHabitTracked,
+  isCompleted,
+  lastCompletedDate,
+  isArchived,
+}) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -71,7 +78,7 @@ function HabitTask({ habit, onHabitTracked, isCompleted, lastCompletedDate, isAr
         </HabitInfo>
       </HabitItemContent>
       {!isArchived && (
-        <Checkbox 
+        <Checkbox
           type="checkbox"
           checked={isCompleted}
           onChange={(e) => {

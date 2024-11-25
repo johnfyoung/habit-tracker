@@ -22,6 +22,8 @@ const Input = styled.input`
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background-color: transparent;
+  color: inherit;
 `;
 
 const Button = styled.button`

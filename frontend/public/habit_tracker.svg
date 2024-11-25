@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="vector" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 775 775">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #4354c3;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 {
+        fill: none;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-9 {
+        stroke-width: 167px;
+      }
+
+      .cls-2 {
+        stroke: #5ad4f0;
+      }
+
+      .cls-3 {
+        stroke: #fd8055;
+      }
+
+      .cls-4 {
+        stroke: #fb4439;
+      }
+
+      .cls-5 {
+        stroke: #6b283b;
+      }
+
+      .cls-6 {
+        stroke: #3b7aa3;
+      }
+
+      .cls-7 {
+        stroke: #ce898b;
+      }
+
+      .cls-8 {
+        stroke: url(#linear-gradient);
+        stroke-width: 120px;
+      }
+
+      .cls-9 {
+        stroke: #ac34fb;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="219.59" y1="329.18" x2="720.34" y2="329.18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fb4439"/>
+      <stop offset="1" stop-color="#fec6b2"/>
+    </linearGradient>
+  </defs>
+  <path class="cls-3" d="M109.18,509.99c-16.51-37.47-25.68-78.91-25.68-122.49,0-48.01,11.13-93.41,30.94-133.78"/>
+  <path class="cls-5" d="M262.01,664.47c-13.51-6.13-26.5-13.23-38.87-21.19-49.9-32.13-89.79-78.47-113.96-133.3"/>
+  <path class="cls-9" d="M459.57,682.9c-23.1,5.62-47.24,8.6-72.07,8.6-44.75,0-87.23-9.67-125.49-27.03"/>
+  <path class="cls-1" d="M658.96,524.48c-20.76,41.07-50.57,76.78-86.8,104.53-32.89,25.18-71.07,43.8-112.59,53.9"/>
+  <path class="cls-2" d="M650.44,234.82c26.11,44.87,41.06,97.03,41.06,152.68,0,41.97-8.51,81.96-23.89,118.33-2.68,6.33-5.56,12.55-8.65,18.65"/>
+  <path class="cls-6" d="M526.25,116.94c5.48,2.81,10.85,5.79,16.13,8.92,38.21,22.67,71.03,53.47,96.07,90.01,4.22,6.16,8.22,12.48,11.98,18.95"/>
+  <path class="cls-7" d="M292.59,98.61c29.86-9.8,61.77-15.11,94.91-15.11,49.99,0,97.16,12.06,138.75,33.44"/>
+  <path class="cls-4" d="M114.44,253.72c13.01-26.5,29.76-50.82,49.56-72.29,34.72-37.63,78.82-66.48,128.59-82.82"/>
+  <polyline class="cls-8" points="262.01 354.81 369.42 462.21 677.91 153.72"/>
+</svg>
