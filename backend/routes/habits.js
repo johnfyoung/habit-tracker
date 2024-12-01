@@ -40,10 +40,12 @@ router.post("/:id/toggle", auth, async (req, res) => {
     }
 
     const trackDate = new Date(date);
+    console.log(`trackDate: ${trackDate}`);
 
     // Function to check if a date is within the habit's frequency
     const isWithinFrequency = (completedDateString) => {
       const completedDate = new Date(completedDateString);
+      console.log(`completedDate: ${completedDate}`);
       const timeDiff = trackDate - completedDate;
       const daysDiff = timeDiff / (1000 * 3600 * 24);
 
@@ -72,7 +74,7 @@ router.post("/:id/toggle", auth, async (req, res) => {
       );
     } else {
       // If no completed date was found within the time frame, add the new date (track)
-      habit.completedDates.push(trackDate.toISOString().split("T")[0]);
+      habit.completedDates.push(trackDate.toISOString());
     }
 
     await habit.save();

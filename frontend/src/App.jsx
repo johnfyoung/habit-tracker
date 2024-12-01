@@ -106,10 +106,11 @@ function App() {
 
   const handleHabitTracked = async (habitId) => {
     try {
-      const today = new Date().toISOString().split("T")[0];
-      console.log(`Toggling habit ${habitId} for date ${today}`);
+      const today = new Date();
+      const todayStr = today.toISOString();
+      console.log(`Toggling habit ${habitId} for date ${todayStr}`);
       const response = await authApi.post(`/habits/${habitId}/toggle`, {
-        date: today,
+        date: todayStr,
       });
       console.log("Habit toggled:", response.data);
       setHabits(

@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import HabitTask from "./HabitTask";
 import { authApi } from "../utils/api";
+import { convertUTCDateToLocalDate } from "../utils/date";
 
 const HabitListContainer = styled.div`
   margin-top: 2rem;
@@ -23,36 +24,31 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
       return false;
     }
 
-    const today = new Date();
-    const todayUTC = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
-    );
-    const todayString = todayUTC.toISOString().split("T")[0];
+    const todayLocal = new Date();
+    const todayLocalString = todayLocal.toISOString().split("T")[0];
 
     switch (habit.frequency.toLowerCase()) {
       case "daily":
         return habit.completedDates.some((date) => {
-          const dateUTC = new Date(date + "T00:00:00Z");
-          const dateString = dateUTC.toISOString().split("T")[0];
-          return dateString === todayString;
+          const dateLocal = convertUTCDateToLocalDate(new Date(date));
+          const dateLocalString = dateLocal.toISOString().split("T")[0];
+          return dateLocalString === todayLocalString;
         });
       case "weekly":
-        const weekStartUTC = new Date(
-          Date.UTC(
-            todayUTC.getUTCFullYear(),
-            todayUTC.getUTCMonth(),
-            todayUTC.getUTCDate() - todayUTC.getUTCDay()
-          )
+        const weekStartLocal = new Date(
+          todayLocal.getFullYear(),
+          todayLocal.getMonth(),
+          todayLocal.getDate() - todayLocal.getDay()
         );
         return habit.completedDates.some(
-          (date) => new Date(date + "T00:00:00Z") >= weekStartUTC
+          (date) => convertUTCDateToLocalDate(new Date(date)) >= weekStartLocal
         );
       case "monthly":
         return habit.completedDates.some((date) => {
-          const completedDateUTC = new Date(date + "T00:00:00Z");
+          const completedDateLocal = convertUTCDateToLocalDate(new Date(date));
           return (
-            completedDateUTC.getUTCMonth() === todayUTC.getUTCMonth() &&
-            completedDateUTC.getUTCFullYear() === todayUTC.getUTCFullYear()
+            completedDateLocal.getMonth() === todayLocal.getMonth() &&
+            completedDateLocal.getFullYear() === todayLocal.getFullYear()
           );
         });
       default:
@@ -65,9 +61,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
       return null;
     }
     return new Date(
-      Math.max(
-        ...completedDates.map((d) => new Date(d + "T00:00:00Z").getTime())
-      )
+      Math.max(...completedDates.map((d) => new Date(d).getTime()))
     );
   };
 
