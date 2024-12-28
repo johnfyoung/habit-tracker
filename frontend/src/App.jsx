@@ -104,9 +104,9 @@ function App() {
     }
   };
 
-  const handleHabitTracked = async (habitId) => {
+  const handleHabitTracked = async (habitId, localDate) => {
     try {
-      const today = new Date();
+      const today = localDate || new Date();
       const todayStr = today.toISOString();
       console.log(`Toggling habit ${habitId} for date ${todayStr}`);
       const response = await authApi.post(`/habits/${habitId}/toggle`, {
@@ -148,7 +148,7 @@ function App() {
       <GlobalStyles />
       <AppContainer>
         <Banner>
-          <Title>Get It Done</Title>
+          <Title>Habit Basics</Title>
           {isAuthenticated && <NavBar onLogout={handleLogout} />}
         </Banner>
         {alert.message && (
@@ -191,7 +191,11 @@ function App() {
                 path="/habit/:id"
                 element={
                   isAuthenticated ? (
-                    <HabitCalendar habits={habits} setHabits={setHabits} />
+                    <HabitCalendar
+                      habits={habits}
+                      setHabits={setHabits}
+                      onHabitTracked={handleHabitTracked}
+                    />
                   ) : (
                     <Navigate to="/login" replace />
                   )

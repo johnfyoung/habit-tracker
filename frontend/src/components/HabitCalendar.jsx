@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Calendar from 'react-calendar';
-import styled from 'styled-components';
-import axios from 'axios';
-import 'react-calendar/dist/Calendar.css';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { isHabitCompleted } from "../utils/habit";
+import Calendar from "react-calendar";
+import styled from "styled-components";
+import axios from "axios";
+import "react-calendar/dist/Calendar.css";
 
 const CalendarContainer = styled.div`
   display: flex;
@@ -93,21 +94,20 @@ const ArchivedNotice = styled.p`
   margin-top: 10px;
 `;
 
-function HabitCalendar({ habits, setHabits }) {
+function HabitCalendar({ habits, setHabits, onHabitTracked }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
 
-  const habit = habits.find(h => h._id === id);
+  const habit = habits.find((h) => h._id === id);
 
   if (!habit) {
     return <div>Habit not found</div>;
   }
 
   const tileClassName = ({ date, view }) => {
-    if (view === 'month') {
-      const dateString = date.toISOString().split('T')[0];
-      return habit.completedDates.includes(dateString) ? 'habit-completed' : null;
+    if (view === "month") {
+      return isHabitCompleted(habit, date) ? "habit-completed" : null;
     }
   };
 
@@ -116,54 +116,77 @@ function HabitCalendar({ habits, setHabits }) {
       return; // Do nothing if the habit is archived
     }
 
-    const clickedDate = value.toISOString().split('T')[0];
-    
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`/api/habits/${habit._id}/toggle`, 
-        { date: clickedDate },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      console.log("toggleHabitCompletion", value);
+      // the date supplied by the calender is just the date, not the time
+      // so we need to add a time to it
+      let date = new Date(value);
+      const now = new Date();
+      if (now.toDateString() === date.toDateString()) {
+        date = now;
+      } else {
+        date.setHours(12, 0, 0, 0);
+      }
 
-      const updatedHabit = response.data;
-      
-      setHabits(habits.map(h => h._id === habit._id ? updatedHabit : h));
+      console.log("date", date);
+      onHabitTracked(habit._id, date);
+
+      // const clickedDate = value;
+
+      //   const token = localStorage.getItem("token");
+      //   const response = await axios.post(
+      //     `/api/habits/${habit._id}/toggle`,
+      //     { date: clickedDate },
+      //     { headers: { Authorization: `Bearer ${token}` } }
+      //   );
+
+      //   const updatedHabit = response.data;
+
+      //   setHabits(habits.map((h) => (h._id === habit._id ? updatedHabit : h)));
     } catch (error) {
-      console.error('Error toggling habit completion:', error);
+      console.error("Error toggling habit completion:", error);
     }
   };
 
   const handleArchiveToggle = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`/api/habits/${habit._id}/toggle-archive`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `/api/habits/${habit._id}/toggle-archive`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const updatedHabit = response.data;
-      setHabits(habits.map(h => h._id === habit._id ? updatedHabit : h));
+      setHabits(habits.map((h) => (h._id === habit._id ? updatedHabit : h)));
       if (updatedHabit.archived) {
-        navigate('/habits');
+        navigate("/habits");
       }
     } catch (error) {
-      console.error('Error toggling archive status:', error);
+      console.error("Error toggling archive status:", error);
     }
   };
 
   return (
     <CalendarContainer>
-      <BackButton onClick={() => navigate('/habits')}>Back to Habits</BackButton>
+      <BackButton onClick={() => navigate("/habits")}>
+        Back to Habits
+      </BackButton>
       <HabitTitle>{habit.name}</HabitTitle>
       {habit.archived && (
-        <ArchivedNotice>This habit is archived. Unarchive to enable tracking.</ArchivedNotice>
+        <ArchivedNotice>
+          This habit is archived. Unarchive to enable tracking.
+        </ArchivedNotice>
       )}
       <StyledCalendar
         onChange={toggleHabitCompletion}
         value={date}
         tileClassName={tileClassName}
-        tileDisabled={({date, view}) => habit.archived && view === 'month'}
+        tileDisabled={({ date, view }) => habit.archived && view === "month"}
       />
       <ArchiveButton onClick={handleArchiveToggle}>
-        {habit.archived ? 'Unarchive' : 'Archive'} Habit
+        {habit.archived ? "Unarchive" : "Archive"} Habit
       </ArchiveButton>
     </CalendarContainer>
   );

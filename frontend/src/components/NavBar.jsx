@@ -83,9 +83,6 @@ function NavBar({ onLogout }) {
 
   return (
     <NavBarContainer>
-      {/* <NavBarLeft>
-        <Clock />
-      </NavBarLeft> */}
       <NavBarRight>
         <HamburgerButton onClick={toggleMobileMenu}>
           {showMobileMenu ? "✕" : "☰"}

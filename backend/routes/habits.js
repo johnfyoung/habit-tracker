@@ -48,15 +48,17 @@ router.post("/:id/toggle", auth, async (req, res) => {
       console.log(`completedDate: ${completedDate}`);
       const timeDiff = trackDate - completedDate;
       const daysDiff = timeDiff / (1000 * 3600 * 24);
+      console.log(`daysDiff: ${daysDiff}`);
+      console.log(`timeDiff: ${timeDiff}`);
 
       switch (habit.frequency) {
         case "daily":
-          return daysDiff < 1;
+          return daysDiff < 1 && daysDiff >= 0;
         case "weekly":
-          return daysDiff < 7;
+          return daysDiff < 7 && daysDiff >= 0;
         case "monthly":
           // Approximate a month as 30 days
-          return daysDiff < 30;
+          return daysDiff < 30 && daysDiff >= 0;
         default:
           return false;
       }
@@ -67,6 +69,7 @@ router.post("/:id/toggle", auth, async (req, res) => {
       .filter(isWithinFrequency)
       .sort((a, b) => new Date(b) - new Date(a))[0];
 
+    console.log("lastCompletedDate", lastCompletedDate);
     if (lastCompletedDate) {
       // If a completed date was found within the time frame, remove it (untrack)
       habit.completedDates = habit.completedDates.filter(

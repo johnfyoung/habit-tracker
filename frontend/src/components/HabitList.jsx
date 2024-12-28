@@ -2,7 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import HabitTask from "./HabitTask";
 import { authApi } from "../utils/api";
-import { convertUTCDateToLocalDate } from "../utils/date";
+import { convertUTCDateToLocalDate, formatDate } from "../utils/date";
+import { isHabitCompleted, getLastCompletedDate } from "../utils/habit";
 
 const HabitListContainer = styled.div`
   margin-top: 2rem;
@@ -19,56 +20,6 @@ const Section = styled.div`
 `;
 
 function HabitList({ habits, setHabits, onHabitTracked }) {
-  const isHabitCompleted = (habit) => {
-    if (!habit.completedDates || habit.completedDates.length === 0) {
-      return false;
-    }
-
-    const todayLocal = new Date();
-    const todayLocalString = todayLocal.toISOString().split("T")[0];
-
-    switch (habit.frequency.toLowerCase()) {
-      case "daily":
-        return habit.completedDates.some((date) => {
-          const dateLocal = convertUTCDateToLocalDate(new Date(date));
-          const dateLocalString = dateLocal.toISOString().split("T")[0];
-          return dateLocalString === todayLocalString;
-        });
-      case "weekly":
-        const weekStartLocal = new Date(
-          todayLocal.getFullYear(),
-          todayLocal.getMonth(),
-          todayLocal.getDate() - todayLocal.getDay()
-        );
-        return habit.completedDates.some(
-          (date) => convertUTCDateToLocalDate(new Date(date)) >= weekStartLocal
-        );
-      case "monthly":
-        return habit.completedDates.some((date) => {
-          const completedDateLocal = convertUTCDateToLocalDate(new Date(date));
-          return (
-            completedDateLocal.getMonth() === todayLocal.getMonth() &&
-            completedDateLocal.getFullYear() === todayLocal.getFullYear()
-          );
-        });
-      default:
-        return false;
-    }
-  };
-
-  const getLastCompletedDate = (completedDates) => {
-    if (!completedDates || completedDates.length === 0) {
-      return null;
-    }
-    return new Date(
-      Math.max(...completedDates.map((d) => new Date(d).getTime()))
-    );
-  };
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", { timeZone: "UTC" });
-  };
-
   const handleArchiveToggle = async (habitId) => {
     try {
       const response = await authApi.post(`/habits/${habitId}/toggle-archive`);
@@ -103,7 +54,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
       <Section>
         <SectionTitle>Completed</SectionTitle>
         {completedHabits.map((habit) => {
-          const lastCompletedDate = getLastCompletedDate(habit.completedDates);
+          const lastCompletedDate = getLastCompletedDate(habit);
           return (
             <HabitTask
               key={habit._id}
