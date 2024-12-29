@@ -3,5 +3,5 @@ export function convertUTCDateToLocalDate(date) {
 }
 
 export const formatDate = (date) => {
-  return date.toLocaleDateString("en-US", { timeZone: "UTC" });
+  return date.toLocaleDateString();
 };
