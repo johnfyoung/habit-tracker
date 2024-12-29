@@ -6,13 +6,18 @@ export const isHabitCompleted = (habit, localDate) => {
   }
 
   const currentLocalDate = localDate || new Date();
-  const currentLocalDateString = currentLocalDate.toISOString().split("T")[0];
+  console.log("currentLocalDate", currentLocalDate);
+  const currentLocalDateString = currentLocalDate.toLocaleDateString();
+  console.log("currentLocalDateString", currentLocalDateString);
 
   switch (habit.frequency.toLowerCase()) {
     case "daily":
       return habit.completedDates.some((date) => {
-        const dateLocal = convertUTCDateToLocalDate(new Date(date));
-        const dateLocalString = dateLocal.toISOString().split("T")[0];
+        // const dateLocal = convertUTCDateToLocalDate(new Date(date));
+        const dateLocal = new Date(date);
+        const dateLocalString = dateLocal.toLocaleDateString();
+        console.log("dateLocalString", dateLocalString);
+
         return dateLocalString === currentLocalDateString;
       });
     case "weekly":

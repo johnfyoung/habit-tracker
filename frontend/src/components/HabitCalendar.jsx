@@ -67,6 +67,12 @@ const StyledCalendar = styled(Calendar)`
 
 const BackButton = styled.button`
   margin-bottom: 20px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
 `;
 
 const HabitTitle = styled.h2`
@@ -130,19 +136,6 @@ function HabitCalendar({ habits, setHabits, onHabitTracked }) {
 
       console.log("date", date);
       onHabitTracked(habit._id, date);
-
-      // const clickedDate = value;
-
-      //   const token = localStorage.getItem("token");
-      //   const response = await axios.post(
-      //     `/api/habits/${habit._id}/toggle`,
-      //     { date: clickedDate },
-      //     { headers: { Authorization: `Bearer ${token}` } }
-      //   );
-
-      //   const updatedHabit = response.data;
-
-      //   setHabits(habits.map((h) => (h._id === habit._id ? updatedHabit : h)));
     } catch (error) {
       console.error("Error toggling habit completion:", error);
     }
