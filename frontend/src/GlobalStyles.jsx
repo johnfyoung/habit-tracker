@@ -20,7 +20,7 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #fff;
+    background-color: #f5f5f5;
   }
 
   body {
@@ -43,7 +43,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   h1 {
-    font-size: 3.2em;
+    font-size: 2.5em;
     line-height: 1.1;
   }
 

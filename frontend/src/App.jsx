@@ -22,7 +22,6 @@ import LoadingScreen from "./components/LoadingScreen";
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   background-color: #f5f5f5;
 `;
 
@@ -140,7 +139,12 @@ function App() {
   };
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return (
+      <>
+        <GlobalStyles />
+        <LoadingScreen />
+      </>
+    );
   }
 
   return (
