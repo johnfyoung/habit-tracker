@@ -6,8 +6,11 @@ const GlobalStyles = createGlobalStyle`
     line-height: 1.5;
     font-weight: 400;
 
-    color-scheme: light;
-    background-color: #fff;
+    color-scheme: light dark;
+    --light-bg-color: #f5f5f5;
+    --light-primary-color: #2196f3;
+    --dark-bg-color: #555555;
+    --dark-primary-color: #5accff;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -20,7 +23,6 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #f5f5f5;
   }
 
   body {
@@ -70,8 +72,18 @@ const GlobalStyles = createGlobalStyle`
 
   @media (prefers-color-scheme: light) {
     :root {
-      color: #213547;
-      background-color: #ffffff;
+      color: var(--light-primary-color);
+      background-color: var(--light-bg-color);
+    }
+    button {
+      background-color: #f9f9f9;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color: var(--dark-primary-color);
+      background-color: var(--dark-bg-color);
     }
     button {
       background-color: #f9f9f9;

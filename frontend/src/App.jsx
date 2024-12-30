@@ -22,7 +22,6 @@ import LoadingScreen from "./components/LoadingScreen";
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
 `;
 
 const Banner = styled.header`

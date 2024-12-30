@@ -7,7 +7,6 @@ const NavBarContainer = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
   background-color: #2196f3;
   color: white;
 `;
@@ -51,7 +50,6 @@ const NavButton = styled(Link)`
   background: none;
   border: none;
   color: white;
-  padding: 1rem;
   font-size: 1.2rem;
   text-decoration: none;
   cursor: pointer;

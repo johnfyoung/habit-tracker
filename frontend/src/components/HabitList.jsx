@@ -10,7 +10,6 @@ const HabitListContainer = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  color: #2196f3;
   margin-bottom: 1rem;
   font-size: 1.2rem;
 `;
