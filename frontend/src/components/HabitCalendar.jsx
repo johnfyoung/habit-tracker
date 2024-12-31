@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { isHabitCompleted } from "../utils/habit";
+import { wasHabitCompletedOnThisDate } from "../utils/habit";
 import Calendar from "react-calendar";
 import styled from "styled-components";
 import axios from "axios";
@@ -113,7 +113,9 @@ function HabitCalendar({ habits, setHabits, onHabitTracked }) {
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      return isHabitCompleted(habit, date) ? "habit-completed" : null;
+      return wasHabitCompletedOnThisDate(habit, date)
+        ? "habit-completed"
+        : null;
     }
   };
 

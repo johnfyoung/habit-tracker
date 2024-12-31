@@ -42,6 +42,17 @@ export const isHabitCompleted = (habit, localDate) => {
   }
 };
 
+export const wasHabitCompletedOnThisDate = (habit, date) => {
+  const currentDateLocal = new Date(date);
+  const currentDateLocalString = currentDateLocal.toLocaleDateString();
+  console.log("currentDateLocal", currentDateLocal);
+  return habit.completedDates.some((date) => {
+    const dateLocal = new Date(date);
+    const dateLocalString = dateLocal.toLocaleDateString();
+    return dateLocalString === currentDateLocalString;
+  });
+};
+
 export const getLastCompletedDate = (habit) => {
   if (!habit?.completedDates || habit.completedDates.length === 0) {
     return null;
