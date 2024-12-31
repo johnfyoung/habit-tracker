@@ -4,6 +4,7 @@ import {
   Route,
   Routes,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import { api, authApi } from "./utils/api";
 import styled from "styled-components";
@@ -18,6 +19,7 @@ import NavBar from "./components/NavBar";
 import Alert from "./components/Alert";
 import GlobalStyles from "./GlobalStyles";
 import LoadingScreen from "./components/LoadingScreen";
+import { useMediaQuery } from "react-responsive";
 
 const AppContainer = styled.div`
   display: flex;
@@ -45,6 +47,7 @@ const ContentWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+  padding-bottom: 4rem;
 `;
 
 const Content = styled.main`
@@ -52,11 +55,36 @@ const Content = styled.main`
   max-width: 800px;
 `;
 
+const Footer = styled.footer`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #2196f3;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+`;
+
+const FooterButton = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
 function App() {
   const [habits, setHabits] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [alert, setAlert] = useState({ message: "", type: "" });
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -148,12 +176,47 @@ function App() {
 
   return (
     <Router>
+      <AppContent
+        isAuthenticated={isAuthenticated}
+        isMobile={isMobile}
+        alert={alert}
+        setAlert={setAlert}
+        habits={habits}
+        setHabits={setHabits}
+        handleLogout={handleLogout}
+        handleLogin={handleLogin}
+        addHabit={addHabit}
+        handleHabitTracked={handleHabitTracked}
+      />
+    </Router>
+  );
+}
+
+function AppContent({
+  isAuthenticated,
+  isMobile,
+  alert,
+  setAlert,
+  habits,
+  setHabits,
+  handleLogout,
+  handleLogin,
+  addHabit,
+  handleHabitTracked,
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <>
       <GlobalStyles />
       <AppContainer>
-        <Banner>
-          <Title>Habit Basics</Title>
-          {isAuthenticated && <NavBar onLogout={handleLogout} />}
-        </Banner>
+        {!isMobile && (
+          <Banner>
+            <Title>Habit Basics</Title>
+            {isAuthenticated && <NavBar onLogout={handleLogout} />}
+          </Banner>
+        )}
+
         {alert.message && (
           <Alert
             message={alert.message}
@@ -228,8 +291,25 @@ function App() {
             </Routes>
           </Content>
         </ContentWrapper>
+
+        {isMobile && isAuthenticated && (
+          <Footer>
+            <FooterButton onClick={() => navigate("/habits")}>
+              Habits
+            </FooterButton>
+            <FooterButton onClick={() => navigate("/profile")}>
+              Profile
+            </FooterButton>
+            <FooterButton onClick={() => navigate("/add-habit")}>
+              Add Habit
+            </FooterButton>
+            <FooterButton onClick={() => navigate("/archive")}>
+              Archive
+            </FooterButton>
+          </Footer>
+        )}
       </AppContainer>
-    </Router>
+    </>
   );
 }
 
