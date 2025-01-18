@@ -44,6 +44,7 @@ router.post("/:id/toggle", auth, async (req, res) => {
 
     // Function to check if a date is within the habit's frequency
     const isWithinFrequency = (completedDateString) => {
+      console.log(`Checking freq...${completedDateString}`);
       const completedDate = new Date(completedDateString);
       console.log(`completedDate: ${completedDate}`);
       const timeDiff = trackDate - completedDate;

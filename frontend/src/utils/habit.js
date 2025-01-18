@@ -6,9 +6,9 @@ export const isHabitCompleted = (habit, localDate) => {
   }
 
   const currentLocalDate = localDate || new Date();
-  console.log("currentLocalDate", currentLocalDate);
+  // console.log("currentLocalDate", currentLocalDate);
   const currentLocalDateString = currentLocalDate.toLocaleDateString();
-  console.log("currentLocalDateString", currentLocalDateString);
+  // console.log("currentLocalDateString", currentLocalDateString);
 
   switch (habit.frequency.toLowerCase()) {
     case "daily":
@@ -16,7 +16,6 @@ export const isHabitCompleted = (habit, localDate) => {
         // const dateLocal = convertUTCDateToLocalDate(new Date(date));
         const dateLocal = new Date(date);
         const dateLocalString = dateLocal.toLocaleDateString();
-        console.log("dateLocalString", dateLocalString);
 
         return dateLocalString === currentLocalDateString;
       });
@@ -45,11 +44,19 @@ export const isHabitCompleted = (habit, localDate) => {
 export const wasHabitCompletedOnThisDate = (habit, date) => {
   const currentDateLocal = new Date(date);
   const currentDateLocalString = currentDateLocal.toLocaleDateString();
-  console.log("currentDateLocal", currentDateLocal);
+  console.log(
+    `Filling out the calendar...is there an entry for ${currentDateLocalString}...`
+  );
   return habit.completedDates.some((date) => {
     const dateLocal = new Date(date);
     const dateLocalString = dateLocal.toLocaleDateString();
-    return dateLocalString === currentDateLocalString;
+
+    const isMatch = dateLocalString === currentDateLocalString;
+    if (isMatch) {
+      console.log(`matched dateLocalString ${dateLocalString}`);
+    }
+
+    return isMatch;
   });
 };
 
