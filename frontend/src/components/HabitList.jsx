@@ -89,16 +89,50 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
     }
   };
 
+  const isInCurrentWeek = (date) => {
+    const now = selectedDate;
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End of week (Saturday)
+
+    return date >= startOfWeek && date <= endOfWeek;
+  };
+
+  const isInCurrentMonth = (date) => {
+    const now = selectedDate;
+    return (
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+    );
+  };
+
   const activeHabits = habits.filter((habit) => !habit.archived);
+
   const todoHabits = activeHabits.filter(
-    (habit) =>
-      !isHabitCompleted(habit) &&
-      !wasHabitCompletedOnThisDate(habit, selectedDate)
+    (habit) => !isHabitCompleted(habit, selectedDate)
   );
-  const completedHabits = activeHabits.filter(
+
+  const todayCompletedHabits = activeHabits.filter(
     (habit) =>
-      isHabitCompleted(habit) &&
-      wasHabitCompletedOnThisDate(habit, selectedDate)
+      habit.frequency === "daily" && isHabitCompleted(habit, selectedDate)
+  );
+
+  const weeklyCompletedHabits = activeHabits.filter(
+    (habit) =>
+      habit.frequency === "weekly" && isHabitCompleted(habit, selectedDate)
+    // habit.completions?.some((completion) => {
+    //   const completionDate = new Date(completion.date);
+    //   return (
+    //     isInCurrentWeek(completionDate) &&
+    //     completionDate.toDateString() !== selectedDate.toDateString()
+    //   );
+    // })
+  );
+
+  const monthlyCompletedHabits = activeHabits.filter(
+    (habit) =>
+      habit.frequency === "monthly" && isHabitCompleted(habit, selectedDate)
   );
 
   return (
@@ -130,10 +164,28 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
           />
         ))}
       </Section>
+
       <Section>
-        <SectionTitle>Completed</SectionTitle>
-        {completedHabits.map((habit) => {
-          const lastCompletedDate = getLastCompletedDate(habit);
+        <SectionTitle>Completed Today</SectionTitle>
+        {todayCompletedHabits.map((habit) => (
+          <HabitTask
+            key={habit._id}
+            habit={habit}
+            onHabitTracked={onHabitTracked}
+            isCompleted={true}
+            lastCompletedDate={formatDate(selectedDate)}
+            onArchiveToggle={handleArchiveToggle}
+            selectedDate={selectedDate}
+          />
+        ))}
+      </Section>
+
+      <Section>
+        <SectionTitle>Completed This Week</SectionTitle>
+        {weeklyCompletedHabits.map((habit) => {
+          const lastCompletion = habit.completions
+            ?.filter((completion) => isInCurrentWeek(new Date(completion.date)))
+            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
           return (
             <HabitTask
               key={habit._id}
@@ -141,7 +193,35 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
               onHabitTracked={onHabitTracked}
               isCompleted={true}
               lastCompletedDate={
-                lastCompletedDate ? formatDate(lastCompletedDate) : null
+                lastCompletion
+                  ? formatDate(new Date(lastCompletion.date))
+                  : null
+              }
+              onArchiveToggle={handleArchiveToggle}
+              selectedDate={selectedDate}
+            />
+          );
+        })}
+      </Section>
+
+      <Section>
+        <SectionTitle>Completed This Month</SectionTitle>
+        {monthlyCompletedHabits.map((habit) => {
+          const lastCompletion = habit.completions
+            ?.filter((completion) =>
+              isInCurrentMonth(new Date(completion.date))
+            )
+            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+          return (
+            <HabitTask
+              key={habit._id}
+              habit={habit}
+              onHabitTracked={onHabitTracked}
+              isCompleted={true}
+              lastCompletedDate={
+                lastCompletion
+                  ? formatDate(new Date(lastCompletion.date))
+                  : null
               }
               onArchiveToggle={handleArchiveToggle}
               selectedDate={selectedDate}
