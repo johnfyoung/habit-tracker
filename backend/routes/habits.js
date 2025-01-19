@@ -44,13 +44,13 @@ router.post("/:id/toggle", auth, async (req, res) => {
 
     // Function to check if a date is within the habit's frequency
     const isWithinFrequency = (completedDateString) => {
-      console.log(`Checking freq...${completedDateString}`);
+      // console.log(`Checking freq...${completedDateString}`);
       const completedDate = new Date(completedDateString);
       console.log(`completedDate: ${completedDate}`);
       const timeDiff = trackDate - completedDate;
       const daysDiff = timeDiff / (1000 * 3600 * 24);
-      console.log(`daysDiff: ${daysDiff}`);
-      console.log(`timeDiff: ${timeDiff}`);
+      // console.log(`daysDiff: ${daysDiff}`);
+      // console.log(`timeDiff: ${timeDiff}`);
 
       switch (habit.frequency) {
         case "daily":

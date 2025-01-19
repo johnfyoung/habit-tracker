@@ -53,7 +53,9 @@ export const wasHabitCompletedOnThisDate = (habit, date) => {
 
     const isMatch = dateLocalString === currentDateLocalString;
     if (isMatch) {
-      console.log(`matched dateLocalString ${dateLocalString}`);
+      console.log(
+        `matched dateLocalString ${dateLocalString}, dateLocal: ${dateLocal}`
+      );
     }
 
     return isMatch;
