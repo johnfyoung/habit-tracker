@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 const Form = styled.form`
   display: flex;
@@ -37,17 +37,79 @@ const Button = styled.button`
   }
 `;
 
+const SliderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const SliderLabel = styled.label`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    font-weight: bold;
+    color: ${(props) =>
+      props.importance > 0
+        ? "#4caf50"
+        : props.importance < 0
+        ? "#f44336"
+        : "#757575"};
+  }
+`;
+
+const Slider = styled.input`
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #ddd;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${(props) =>
+      props.importance > 0
+        ? "#4caf50"
+        : props.importance < 0
+        ? "#f44336"
+        : "#757575"};
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: ${(props) =>
+      props.importance > 0
+        ? "#4caf50"
+        : props.importance < 0
+        ? "#f44336"
+        : "#757575"};
+    cursor: pointer;
+    border: none;
+  }
+`;
+
 function HabitForm({ addHabit }) {
-  const [name, setName] = useState('');
-  const [frequency, setFrequency] = useState('daily');
+  const [name, setName] = useState("");
+  const [frequency, setFrequency] = useState("daily");
+  const [importance, setImportance] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addHabit({ name, frequency });
-    setName('');
-    setFrequency('daily');
-    navigate('/habits');
+    await addHabit({ name, frequency, importance });
+    setName("");
+    setFrequency("daily");
+    setImportance(0);
+    navigate("/habits");
   };
 
   return (
@@ -59,14 +121,23 @@ function HabitForm({ addHabit }) {
         onChange={(e) => setName(e.target.value)}
         required
       />
-      <Select
-        value={frequency}
-        onChange={(e) => setFrequency(e.target.value)}
-      >
+      <Select value={frequency} onChange={(e) => setFrequency(e.target.value)}>
         <option value="daily">Daily</option>
         <option value="weekly">Weekly</option>
         <option value="monthly">Monthly</option>
       </Select>
+      <SliderContainer>
+        <SliderLabel importance={importance}>
+          Habit Importance <span>{importance}</span>
+        </SliderLabel>
+        <Slider
+          type="range"
+          min="-10"
+          max="10"
+          value={importance}
+          onChange={(e) => setImportance(parseInt(e.target.value))}
+        />
+      </SliderContainer>
       <Button type="submit">Add Habit</Button>
     </Form>
   );

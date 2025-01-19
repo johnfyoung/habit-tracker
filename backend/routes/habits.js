@@ -17,6 +17,7 @@ router.post("/", auth, async (req, res) => {
     name: req.body.name,
     frequency: req.body.frequency,
     user: req.userId,
+    importance: req.importance,
   });
 
   try {
@@ -100,6 +101,23 @@ router.post("/:id/toggle-archive", auth, async (req, res) => {
     res.json(habit);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.userId });
+    if (!habit) {
+      return res.status(404).json({ message: "Habit not found" });
+    }
+
+    habit.name = req.body.name;
+    habit.importance = req.body.importance;
+
+    const updatedHabit = await habit.save();
+    res.json(updatedHabit);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

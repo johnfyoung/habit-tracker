@@ -4,6 +4,13 @@ const habitSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     frequency: { type: String, required: true },
+    importance: {
+      type: Number,
+      required: true,
+      min: -10,
+      max: 10,
+      default: 0,
+    },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     completedDates: [
       {

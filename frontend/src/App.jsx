@@ -10,7 +10,7 @@ import { api, authApi } from "./utils/api";
 import styled from "styled-components";
 import HabitList from "./components/HabitList";
 import HabitForm from "./components/HabitForm";
-import HabitCalendar from "./components/HabitCalendar";
+import Habit from "./components/Habit";
 import HabitArchive from "./components/HabitArchive";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -257,7 +257,7 @@ function AppContent({
                 path="/habit/:id"
                 element={
                   isAuthenticated ? (
-                    <HabitCalendar
+                    <Habit
                       habits={habits}
                       setHabits={setHabits}
                       onHabitTracked={handleHabitTracked}
