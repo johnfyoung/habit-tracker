@@ -10,7 +10,7 @@ import {
 } from "../utils/habit";
 
 const HabitListContainer = styled.div`
-  margin-top: 2rem;
+  position: relative;
 `;
 
 const SectionTitle = styled.h2`
@@ -22,12 +22,40 @@ const Section = styled.div`
   margin-bottom: 2rem;
 `;
 
+const HorizontalCalendarWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  background: var(--light-bg-color);
+  z-index: 1;
+  padding-bottom: 1rem;
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--dark-bg-color);
+  }
+`;
+
+const MonthIndicator = styled.div`
+  padding: 0.5rem 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--light-primary-color);
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--dark-primary-color);
+  }
+`;
+
 const HorizontalCalendar = styled.div`
   display: flex;
   overflow-x: auto;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 `;
 
 const DateButton = styled.button`
@@ -62,17 +90,101 @@ const DateButton = styled.button`
 
 function HabitList({ habits, setHabits, onHabitTracked }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [visibleDays, setVisibleDays] = useState(30);
+  const [currentMonth, setCurrentMonth] = useState("");
+  const [scrollRight, setScrollRight] = useState(0);
+  const [isSettingScrollPosition, setIsSettingScrollPosition] = useState(false);
+  const calendarRef = React.useRef(null);
+  const isInitialMount = React.useRef(true);
 
-  // Generate last 7 days for the horizontal calendar
+  // Generate days for the horizontal calendar
   const getDays = () => {
     const days = [];
-    for (let i = 6; i >= 0; i--) {
+    const today = new Date();
+
+    // Generate only past days and today
+    for (let i = visibleDays - 1; i >= 0; i--) {
       const date = new Date();
-      date.setDate(date.getDate() - i);
+      date.setDate(today.getDate() - i);
       days.push(date);
     }
     return days;
   };
+
+  // Calculate visible month based on scroll position
+  const calculateVisibleMonth = () => {
+    if (!calendarRef.current) return;
+
+    const element = calendarRef.current;
+    const scrollPosition = element.scrollLeft;
+    const dateElements = Array.from(element.children);
+
+    if (dateElements.length === 0) return;
+
+    // Find the first fully visible date element
+    const elementWidth = dateElements[0].offsetWidth;
+    const visibleIndex = Math.floor(scrollPosition / elementWidth);
+
+    // Get the date from the button's key attribute
+    const visibleDateElement = dateElements[visibleIndex];
+    if (!visibleDateElement) return;
+
+    const dateString = visibleDateElement.getAttribute("data-date");
+    if (!dateString) return;
+
+    const visibleDate = new Date(dateString);
+    const monthYear = visibleDate.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+    setCurrentMonth(monthYear);
+  };
+
+  // Handle scroll to load more dates
+  const handleScroll = (e) => {
+    const element = e.target;
+    if (!isSettingScrollPosition) {
+      const isNearStart = element.scrollLeft < 100;
+      if (isNearStart) {
+        setIsSettingScrollPosition(true);
+        setScrollRight(element.scrollWidth - element.scrollLeft);
+        setVisibleDays((prev) => prev + 30);
+      }
+    }
+
+    calculateVisibleMonth();
+  };
+
+  // Add resize event listener
+  React.useEffect(() => {
+    const handleResize = () => {
+      calculateVisibleMonth();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Scroll to the end (current day) when component mounts
+  // OR maintain scroll position when loading more days
+  React.useEffect(() => {
+    if (!calendarRef.current) return;
+
+    if (isInitialMount.current) {
+      // Initial mount - scroll to end
+      calendarRef.current.scrollLeft = calendarRef.current.scrollWidth;
+      calculateVisibleMonth();
+      isInitialMount.current = false;
+    } else {
+      // Loading more days - maintain relative scroll position
+      const scrollWidth = calendarRef.current.scrollWidth;
+      const maxWidth = calendarRef.current.clientWidth;
+      const maxScroll = scrollWidth - maxWidth;
+      calendarRef.current.scrollLeft = maxScroll - scrollRight;
+      calculateVisibleMonth();
+      setIsSettingScrollPosition(false);
+    }
+  }, [visibleDays]);
 
   // Format day name
   const getDayName = (date) => {
@@ -121,13 +233,6 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
   const weeklyCompletedHabits = activeHabits.filter(
     (habit) =>
       habit.frequency === "weekly" && isHabitCompleted(habit, selectedDate)
-    // habit.completions?.some((completion) => {
-    //   const completionDate = new Date(completion.date);
-    //   return (
-    //     isInCurrentWeek(completionDate) &&
-    //     completionDate.toDateString() !== selectedDate.toDateString()
-    //   );
-    // })
   );
 
   const monthlyCompletedHabits = activeHabits.filter(
@@ -137,18 +242,22 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
 
   return (
     <HabitListContainer>
-      <HorizontalCalendar>
-        {getDays().map((date) => (
-          <DateButton
-            key={date.toISOString()}
-            selected={date.toDateString() === selectedDate.toDateString()}
-            onClick={() => setSelectedDate(date)}
-          >
-            <span className="day-name">{getDayName(date)}</span>
-            <span className="day-number">{date.getDate()}</span>
-          </DateButton>
-        ))}
-      </HorizontalCalendar>
+      <HorizontalCalendarWrapper>
+        <MonthIndicator>{currentMonth}</MonthIndicator>
+        <HorizontalCalendar ref={calendarRef} onScroll={handleScroll}>
+          {getDays().map((date) => (
+            <DateButton
+              key={date.toISOString()}
+              data-date={date.toISOString()} // Add date as data attribute
+              selected={date.toDateString() === selectedDate.toDateString()}
+              onClick={() => setSelectedDate(date)}
+            >
+              <span className="day-name">{getDayName(date)}</span>
+              <span className="day-number">{date.getDate()}</span>
+            </DateButton>
+          ))}
+        </HorizontalCalendar>
+      </HorizontalCalendarWrapper>
 
       <Section>
         <SectionTitle>To Do</SectionTitle>
@@ -165,70 +274,78 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
         ))}
       </Section>
 
-      <Section>
-        <SectionTitle>Completed Today</SectionTitle>
-        {todayCompletedHabits.map((habit) => (
-          <HabitTask
-            key={habit._id}
-            habit={habit}
-            onHabitTracked={onHabitTracked}
-            isCompleted={true}
-            lastCompletedDate={formatDate(selectedDate)}
-            onArchiveToggle={handleArchiveToggle}
-            selectedDate={selectedDate}
-          />
-        ))}
-      </Section>
-
-      <Section>
-        <SectionTitle>Completed This Week</SectionTitle>
-        {weeklyCompletedHabits.map((habit) => {
-          const lastCompletion = habit.completions
-            ?.filter((completion) => isInCurrentWeek(new Date(completion.date)))
-            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-          return (
+      {weeklyCompletedHabits.length > 0 && (
+        <Section>
+          <SectionTitle>Completed Daily Habits</SectionTitle>
+          {todayCompletedHabits.map((habit) => (
             <HabitTask
               key={habit._id}
               habit={habit}
               onHabitTracked={onHabitTracked}
               isCompleted={true}
-              lastCompletedDate={
-                lastCompletion
-                  ? formatDate(new Date(lastCompletion.date))
-                  : null
-              }
+              lastCompletedDate={formatDate(selectedDate)}
               onArchiveToggle={handleArchiveToggle}
               selectedDate={selectedDate}
             />
-          );
-        })}
-      </Section>
+          ))}
+        </Section>
+      )}
 
-      <Section>
-        <SectionTitle>Completed This Month</SectionTitle>
-        {monthlyCompletedHabits.map((habit) => {
-          const lastCompletion = habit.completions
-            ?.filter((completion) =>
-              isInCurrentMonth(new Date(completion.date))
-            )
-            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-          return (
-            <HabitTask
-              key={habit._id}
-              habit={habit}
-              onHabitTracked={onHabitTracked}
-              isCompleted={true}
-              lastCompletedDate={
-                lastCompletion
-                  ? formatDate(new Date(lastCompletion.date))
-                  : null
-              }
-              onArchiveToggle={handleArchiveToggle}
-              selectedDate={selectedDate}
-            />
-          );
-        })}
-      </Section>
+      {weeklyCompletedHabits.length > 0 && (
+        <Section>
+          <SectionTitle>Completed Weekly Habits</SectionTitle>
+          {weeklyCompletedHabits.map((habit) => {
+            const lastCompletion = habit.completions
+              ?.filter((completion) =>
+                isInCurrentWeek(new Date(completion.date))
+              )
+              .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            return (
+              <HabitTask
+                key={habit._id}
+                habit={habit}
+                onHabitTracked={onHabitTracked}
+                isCompleted={true}
+                lastCompletedDate={
+                  lastCompletion
+                    ? formatDate(new Date(lastCompletion.date))
+                    : null
+                }
+                onArchiveToggle={handleArchiveToggle}
+                selectedDate={selectedDate}
+              />
+            );
+          })}
+        </Section>
+      )}
+
+      {monthlyCompletedHabits.length > 0 && (
+        <Section>
+          <SectionTitle>Completed Monthly Habits</SectionTitle>
+          {monthlyCompletedHabits.map((habit) => {
+            const lastCompletion = habit.completions
+              ?.filter((completion) =>
+                isInCurrentMonth(new Date(completion.date))
+              )
+              .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            return (
+              <HabitTask
+                key={habit._id}
+                habit={habit}
+                onHabitTracked={onHabitTracked}
+                isCompleted={true}
+                lastCompletedDate={
+                  lastCompletion
+                    ? formatDate(new Date(lastCompletion.date))
+                    : null
+                }
+                onArchiveToggle={handleArchiveToggle}
+                selectedDate={selectedDate}
+              />
+            );
+          })}
+        </Section>
+      )}
     </HabitListContainer>
   );
 }
