@@ -21,9 +21,9 @@ export default defineConfig({
         clientsClaim: true,
       },
       manifest: {
-        name: "Habit Tracker App",
-        short_name: "Habit Tracker",
-        description: "Your personal habit tracking application",
+        name: "Habit Basics App",
+        short_name: "Habit Basics",
+        description: "Your personal basic habit tracking application",
         theme_color: "#2196f3",
       },
     }),

@@ -274,7 +274,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
         ))}
       </Section>
 
-      {weeklyCompletedHabits.length > 0 && (
+      {todayCompletedHabits.length > 0 && (
         <Section>
           <SectionTitle>Completed Daily Habits</SectionTitle>
           {todayCompletedHabits.map((habit) => (
