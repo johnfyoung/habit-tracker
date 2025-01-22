@@ -240,6 +240,23 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
       habit.frequency === "monthly" && isHabitCompleted(habit, selectedDate)
   );
 
+  // Handle date selection in the horizontal calendar
+  const handleDateSelect = (date) => {
+    console.log(`selected date: ${date}`);
+    setSelectedDate(date);
+  };
+
+  // Toggle habit completion using the selected date
+  const toggleHabitCompletion = async (habitId) => {
+    try {
+      const date = selectedDate; // Use the selected date
+      // Call your API or function to toggle the habit completion
+      await onHabitTracked(habitId, date);
+    } catch (error) {
+      console.error("Error toggling habit completion:", error);
+    }
+  };
+
   return (
     <HabitListContainer>
       <HorizontalCalendarWrapper>
@@ -248,9 +265,9 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
           {getDays().map((date) => (
             <DateButton
               key={date.toISOString()}
-              data-date={date.toISOString()} // Add date as data attribute
+              data-date={date.toISOString()}
               selected={date.toDateString() === selectedDate.toDateString()}
-              onClick={() => setSelectedDate(date)}
+              onClick={() => handleDateSelect(date)}
             >
               <span className="day-name">{getDayName(date)}</span>
               <span className="day-number">{date.getDate()}</span>
@@ -265,7 +282,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
           <HabitTask
             key={habit._id}
             habit={habit}
-            onHabitTracked={onHabitTracked}
+            onHabitTracked={toggleHabitCompletion}
             isCompleted={false}
             lastCompletedDate={null}
             onArchiveToggle={handleArchiveToggle}
@@ -281,7 +298,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
             <HabitTask
               key={habit._id}
               habit={habit}
-              onHabitTracked={onHabitTracked}
+              onHabitTracked={toggleHabitCompletion}
               isCompleted={true}
               lastCompletedDate={formatDate(selectedDate)}
               onArchiveToggle={handleArchiveToggle}
@@ -304,7 +321,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
               <HabitTask
                 key={habit._id}
                 habit={habit}
-                onHabitTracked={onHabitTracked}
+                onHabitTracked={toggleHabitCompletion}
                 isCompleted={true}
                 lastCompletedDate={
                   lastCompletion
@@ -332,7 +349,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
               <HabitTask
                 key={habit._id}
                 habit={habit}
-                onHabitTracked={onHabitTracked}
+                onHabitTracked={toggleHabitCompletion}
                 isCompleted={true}
                 lastCompletedDate={
                   lastCompletion
