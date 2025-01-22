@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { authApi } from "../utils/api";
 import styled from "styled-components"; // Import styled-components
-import Alert from "./Alert"; // Import the Alert component
+import Alert from "../components/Alert"; // Import the Alert component
 
 // Styled components similar to HabitForm
 const FormContainer = styled.div`
@@ -42,7 +42,7 @@ function UserProfile() {
     const fetchUserProfile = async () => {
       try {
         const response = await authApi.get(`/user/profile`);
-        console.log(response);
+        console.log("User profile response:", response);
         setName(response.data.username || ""); // Use empty string if name is undefined
         setCurrentName(response.data.username || "");
       } catch (error) {

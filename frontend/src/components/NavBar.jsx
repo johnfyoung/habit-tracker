@@ -5,10 +5,11 @@ import Clock from "./Clock";
 
 const NavBarContainer = styled.nav`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  background-color: #2196f3;
   color: white;
+  background-color: ${props => props.$standalone ? '#2196f3' : 'transparent'};
+  padding: ${props => props.$standalone ? '1rem' : '0'};
 `;
 
 const NavBarLeft = styled.div`
@@ -72,41 +73,25 @@ const LogoutButton = styled.button`
   }
 `;
 
-function NavBar({ onLogout }) {
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setShowMobileMenu(!showMobileMenu);
-  };
+function NavBar({ isAuthenticated, onLogout, isMobile, $standalone }) {
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <NavBarContainer>
+    <NavBarContainer $standalone={$standalone}>
       <NavBarRight>
-        <HamburgerButton onClick={toggleMobileMenu}>
-          {showMobileMenu ? "✕" : "☰"}
-        </HamburgerButton>
-        <MobileMenu $show={showMobileMenu}>
-          <NavButton to="/habits" onClick={toggleMobileMenu}>
-            Habits
-          </NavButton>
-          <NavButton to="/profile" onClick={toggleMobileMenu}>
-            Profile
-          </NavButton>
-          <NavButton to="/add-habit" onClick={toggleMobileMenu}>
-            Add Habit
-          </NavButton>
-          <NavButton to="/archive" onClick={toggleMobileMenu}>
-            Archive
-          </NavButton>
-          <LogoutButton
-            onClick={() => {
-              onLogout();
-              toggleMobileMenu();
-            }}
-          >
-            Logout
-          </LogoutButton>
-        </MobileMenu>
+        {isAuthenticated ? (
+          <>
+            {!isMobile && <Clock />}
+            <NavButton as="button" onClick={onLogout}>
+              Logout
+            </NavButton>
+          </>
+        ) : (
+          <>
+            <NavButton to="/login">Login</NavButton>
+            <NavButton to="/register">Register</NavButton>
+          </>
+        )}
       </NavBarRight>
     </NavBarContainer>
   );

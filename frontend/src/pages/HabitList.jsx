@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import HabitTask from "./HabitTask";
+import HabitTask from "../components/HabitTask";
 import { authApi } from "../utils/api";
 import { convertUTCDateToLocalDate, formatDate } from "../utils/date";
 import {
@@ -242,7 +242,6 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
 
   // Handle date selection in the horizontal calendar
   const handleDateSelect = (date) => {
-    console.log(`selected date: ${date}`);
     setSelectedDate(date);
   };
 

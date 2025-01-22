@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import styled from "styled-components";
-import Alert from "./Alert";
+import Alert from "../components/Alert";
 
 const FormContainer = styled.div`
   display: flex;

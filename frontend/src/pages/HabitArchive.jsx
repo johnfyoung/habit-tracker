@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import HabitTask from './HabitTask';
+import HabitTask from '../components/HabitTask';
 import axios from 'axios';
 
 const ArchiveContainer = styled.div`

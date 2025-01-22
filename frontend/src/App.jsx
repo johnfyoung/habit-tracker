@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
+  createBrowserRouter,
+  RouterProvider,
   Navigate,
-  useNavigate,
+  Outlet,
 } from "react-router-dom";
 import { api, authApi } from "./utils/api";
 import styled from "styled-components";
-import HabitList from "./components/HabitList";
-import HabitForm from "./components/HabitForm";
-import Habit from "./components/Habit";
-import HabitArchive from "./components/HabitArchive";
-import Register from "./components/Register";
-import Login from "./components/Login";
-import UserProfile from "./components/UserProfile";
+import HabitList from "./pages/HabitList";
+import HabitForm from "./pages/HabitForm";
+import Habit from "./pages/Habit";
+import HabitArchive from "./pages/HabitArchive";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import UserProfile from "./pages/UserProfile";
 import NavBar from "./components/NavBar";
 import Alert from "./components/Alert";
 import GlobalStyles from "./GlobalStyles";
@@ -24,6 +23,7 @@ import { useMediaQuery } from "react-responsive";
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 `;
 
 const Banner = styled.header`
@@ -35,10 +35,14 @@ const Banner = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 1;
 `;
 
 const Title = styled.h1`
   margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
 `;
 
 const ContentWrapper = styled.div`
@@ -89,7 +93,6 @@ function App() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("token");
-      console.log("Stored token:", token); // Add this line for debugging
       if (token) {
         try {
           await authApi.get("/auth/verify");
@@ -139,9 +142,11 @@ function App() {
         date: todayStr,
       });
       console.log("Habit toggled:", response.data);
+      console.log("Habits before update:", habits);
       setHabits(
         habits.map((habit) => (habit._id === habitId ? response.data : habit))
       );
+      console.log("Habits after update:", habits);
     } catch (error) {
       console.error("Error toggling habit:", error);
     }
@@ -174,21 +179,93 @@ function App() {
     );
   }
 
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: (
+        <AppContent
+          isAuthenticated={isAuthenticated}
+          isMobile={isMobile}
+          alert={alert}
+          setAlert={setAlert}
+          habits={habits}
+          setHabits={setHabits}
+          handleLogout={handleLogout}
+          handleLogin={handleLogin}
+          addHabit={addHabit}
+          handleHabitTracked={handleHabitTracked}
+        />
+      ),
+      children: [
+        {
+          index: true,
+          element: isAuthenticated ? (
+            <HabitList habits={habits} onHabitTracked={handleHabitTracked} />
+          ) : (
+            <Navigate to="/login" />
+          ),
+        },
+        {
+          path: "register",
+          element: !isAuthenticated ? (
+            <Register showAlert={showAlert} onLogin={handleLogin} />
+          ) : (
+            <Navigate to="/" />
+          ),
+        },
+        {
+          path: "login",
+          element: !isAuthenticated ? (
+            <Login showAlert={showAlert} onLogin={handleLogin} />
+          ) : (
+            <Navigate to="/" />
+          ),
+        },
+        {
+          path: "profile",
+          element: isAuthenticated ? (
+            <UserProfile showAlert={showAlert} />
+          ) : (
+            <Navigate to="/login" />
+          ),
+        },
+        {
+          path: "archive",
+          element: isAuthenticated ? (
+            <HabitArchive habits={habits} />
+          ) : (
+            <Navigate to="/login" />
+          ),
+        },
+        {
+          path: "add",
+          element: isAuthenticated ? (
+            <HabitForm onSubmit={addHabit} />
+          ) : (
+            <Navigate to="/login" />
+          ),
+        },
+        {
+          path: "habit/:id",
+          element: isAuthenticated ? (
+            <Habit
+              habits={habits}
+              setHabits={setHabits}
+              onHabitTracked={handleHabitTracked}
+            />
+          ) : (
+            <Navigate to="/login" />
+          ),
+        },
+      ],
+    },
+  ]);
+
   return (
-    <Router>
-      <AppContent
-        isAuthenticated={isAuthenticated}
-        isMobile={isMobile}
-        alert={alert}
-        setAlert={setAlert}
-        habits={habits}
-        setHabits={setHabits}
-        handleLogout={handleLogout}
-        handleLogin={handleLogin}
-        addHabit={addHabit}
-        handleHabitTracked={handleHabitTracked}
-      />
-    </Router>
+    <>
+      <GlobalStyles />
+      <RouterProvider router={router} />
+    </>
   );
 }
 
@@ -204,112 +281,50 @@ function AppContent({
   addHabit,
   handleHabitTracked,
 }) {
-  const navigate = useNavigate();
-
   return (
-    <>
-      <GlobalStyles />
-      <AppContainer>
-        {!isMobile && (
-          <Banner>
-            <Title>Habit Basics</Title>
-            {isAuthenticated && <NavBar onLogout={handleLogout} />}
-          </Banner>
-        )}
-
-        {alert.message && (
-          <Alert
-            message={alert.message}
-            type={alert.type}
-            onClose={() => setAlert({ message: "", type: "" })}
+    <AppContainer>
+      {!isMobile && (
+        <Banner>
+          <Title>Habit Tracker</Title>
+          <NavBar
+            isAuthenticated={isAuthenticated}
+            onLogout={handleLogout}
+            isMobile={isMobile}
+            $standalone={false}
           />
-        )}
-        <ContentWrapper>
-          <Content>
-            <Routes>
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login onLogin={handleLogin} />} />
-              <Route
-                path="/habits"
-                element={
-                  isAuthenticated ? (
-                    <HabitList
-                      habits={habits.filter((h) => !h.archived)}
-                      setHabits={setHabits}
-                      onHabitTracked={handleHabitTracked}
-                    />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
-              <Route
-                path="/add-habit"
-                element={
-                  isAuthenticated ? (
-                    <HabitForm addHabit={addHabit} />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
-              <Route
-                path="/habit/:id"
-                element={
-                  isAuthenticated ? (
-                    <Habit
-                      habits={habits}
-                      setHabits={setHabits}
-                      onHabitTracked={handleHabitTracked}
-                    />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
-              <Route
-                path="/archive"
-                element={
-                  isAuthenticated ? (
-                    <HabitArchive habits={habits} setHabits={setHabits} />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  isAuthenticated ? (
-                    <UserProfile />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
-              <Route path="/" element={<Navigate to="/habits" replace />} />
-            </Routes>
-          </Content>
-        </ContentWrapper>
-
-        {isMobile && isAuthenticated && (
-          <Footer>
-            <FooterButton onClick={() => navigate("/habits")}>
-              Habits
-            </FooterButton>
-            <FooterButton onClick={() => navigate("/profile")}>
-              Profile
-            </FooterButton>
-            <FooterButton onClick={() => navigate("/add-habit")}>
-              Add Habit
-            </FooterButton>
-            <FooterButton onClick={() => navigate("/archive")}>
-              Archive
-            </FooterButton>
-          </Footer>
-        )}
-      </AppContainer>
-    </>
+        </Banner>
+      )}
+      {isMobile && (
+        <NavBar
+          isAuthenticated={isAuthenticated}
+          onLogout={handleLogout}
+          isMobile={isMobile}
+          $standalone={true}
+        />
+      )}
+      {alert.message && <Alert message={alert.message} type={alert.type} />}
+      <ContentWrapper>
+        <Content>
+          <Outlet />
+        </Content>
+      </ContentWrapper>
+      {isMobile && isAuthenticated && (
+        <Footer>
+          <FooterButton onClick={() => navigate("/")}>
+            <span>Home</span>
+          </FooterButton>
+          <FooterButton onClick={() => navigate("/add")}>
+            <span>Add</span>
+          </FooterButton>
+          <FooterButton onClick={() => navigate("/archive")}>
+            <span>Archive</span>
+          </FooterButton>
+          <FooterButton onClick={() => navigate("/profile")}>
+            <span>Profile</span>
+          </FooterButton>
+        </Footer>
+      )}
+    </AppContainer>
   );
 }
 

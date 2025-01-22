@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const HabitItem = styled.div`
   background-color: var(--light-bg-color);
@@ -21,8 +21,8 @@ const HabitItem = styled.div`
     bottom: 0;
     width: 4px;
     background-color: ${(props) => {
-      if (props.importance > 0) return "#4caf50";
-      if (props.importance < 0) return "#f44336";
+      if (props.$importance > 0) return "#4caf50";
+      if (props.$importance < 0) return "#f44336";
       return "var(--light-primary-color)";
     }};
     border-radius: 8px 0 0 8px;
@@ -33,8 +33,8 @@ const HabitItem = styled.div`
 
     &::before {
       background-color: ${(props) => {
-        if (props.importance > 0) return "#4caf50";
-        if (props.importance < 0) return "#f44336";
+        if (props.$importance > 0) return "#4caf50";
+        if (props.$importance < 0) return "#f44336";
         return "var(--dark-primary-color)";
       }};
     }
@@ -73,20 +73,11 @@ const Checkbox = styled.input`
   background-color: transparent;
 `;
 
-const HabitItemContent = styled.div`
+const StyledLink = styled(Link)`
   flex-grow: 1;
   cursor: pointer;
-`;
-
-const ArchiveButton = styled.button`
-  background: none;
-  border: none;
-  color: #757575;
-  cursor: pointer;
-  margin-left: 10px;
-  &:hover {
-    color: #2196f3;
-  }
+  text-decoration: none;
+  color: inherit;
 `;
 
 const HabitTaskContainer = styled.div`
@@ -107,8 +98,8 @@ const HabitTaskContainer = styled.div`
     bottom: 0;
     width: 4px;
     background-color: ${(props) => {
-      if (props.importance > 0) return "#4caf50";
-      if (props.importance < 0) return "#f44336";
+      if (props.$importance > 0) return "#4caf50";
+      if (props.$importance < 0) return "#f44336";
       return "transparent";
     }};
     border-radius: 4px 0 0 4px;
@@ -125,36 +116,32 @@ function HabitTask({
   isCompleted,
   lastCompletedDate,
   isArchived,
-  onArchiveToggle,
   selectedDate,
 }) {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/habit/${habit._id}`);
+  const handleCheckboxChange = () => {
+    onHabitTracked(habit._id, selectedDate);
   };
 
   return (
-    <HabitItem importance={habit.importance}>
-      <HabitItemContent onClick={handleClick}>
+    <HabitItem $importance={habit.importance}>
+      <StyledLink to={`/habit/${habit._id}`}>
         <HabitInfo>
           <HabitName>{habit.name}</HabitName>
-          <HabitDetails>Frequency: {habit.frequency}</HabitDetails>
-          {isCompleted && lastCompletedDate && (
-            <HabitDetails>Last completed: {lastCompletedDate}</HabitDetails>
-          )}
+          <HabitDetails>
+            Frequency: {habit.frequency} | Importance:{" "}
+            {habit.importance > 0
+              ? "+"
+              : habit.importance < 0
+              ? "-"
+              : "neutral"}
+          </HabitDetails>
         </HabitInfo>
-      </HabitItemContent>
-      {!isArchived && (
-        <Checkbox
-          type="checkbox"
-          checked={isCompleted}
-          onChange={(e) => {
-            e.stopPropagation();
-            onHabitTracked(habit._id);
-          }}
-        />
-      )}
+      </StyledLink>
+      <Checkbox
+        type="checkbox"
+        checked={isCompleted}
+        onChange={handleCheckboxChange}
+      />
     </HabitItem>
   );
 }

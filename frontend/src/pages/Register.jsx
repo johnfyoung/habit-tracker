@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
-import Alert from './Alert';
+import Alert from '../components/Alert';
 
 const FormContainer = styled.div`
   display: flex;

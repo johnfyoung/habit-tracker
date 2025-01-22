@@ -231,6 +231,28 @@ function Habit({ habits, setHabits, onHabitTracked }) {
 
   const habit = habits.find((h) => h._id === id);
 
+  const onArchiveToggle = async () => {
+    if (!habit) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `/api/habits/${habit._id}/toggle-archive`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setHabits(habits.map((h) => (h._id === habit._id ? response.data : h)));
+      if (response.data.archived) {
+        navigate("/habits");
+      }
+    } catch (error) {
+      console.error("Error toggling archive status:", error);
+    }
+  };
+
   if (!habit) {
     return <div>Habit not found</div>;
   }
@@ -264,26 +286,6 @@ function Habit({ habits, setHabits, onHabitTracked }) {
       onHabitTracked(habit._id, date);
     } catch (error) {
       console.error("Error toggling habit completion:", error);
-    }
-  };
-
-  const handleArchiveToggle = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `/api/habits/${habit._id}/toggle-archive`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const updatedHabit = response.data;
-      setHabits(habits.map((h) => (h._id === habit._id ? updatedHabit : h)));
-      if (updatedHabit.archived) {
-        navigate("/habits");
-      }
-    } catch (error) {
-      console.error("Error toggling archive status:", error);
     }
   };
 
@@ -375,7 +377,7 @@ function Habit({ habits, setHabits, onHabitTracked }) {
         locale={userLocale}
       />
 
-      <ArchiveButton onClick={handleArchiveToggle}>
+      <ArchiveButton onClick={onArchiveToggle}>
         {habit.archived ? "Unarchive" : "Archive"} Habit
       </ArchiveButton>
     </CalendarContainer>
