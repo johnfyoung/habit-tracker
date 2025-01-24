@@ -27,7 +27,7 @@ const HorizontalCalendarWrapper = styled.div`
   top: 0;
   background: var(--light-bg-color);
   padding-bottom: 1rem;
-
+  z-index: 2;
   @media (prefers-color-scheme: dark) {
     background: var(--dark-bg-color);
   }
