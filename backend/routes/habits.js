@@ -17,7 +17,7 @@ router.post("/", auth, async (req, res) => {
     name: req.body.name,
     frequency: req.body.frequency,
     user: req.userId,
-    importance: req.importance,
+    importance: req.body.importance,
   });
 
   try {

@@ -89,6 +89,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [alert, setAlert] = useState({ message: "", type: "" });
+  const [alertTimeout, setAlertTimeout] = useState(null);
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
@@ -241,7 +242,7 @@ function App() {
         {
           path: "add",
           element: isAuthenticated ? (
-            <HabitForm onSubmit={addHabit} />
+            <HabitForm addHabit={addHabit} />
           ) : (
             <Navigate to="/login" />
           ),
@@ -253,6 +254,7 @@ function App() {
               habits={habits}
               setHabits={setHabits}
               onHabitTracked={handleHabitTracked}
+              showAlert={showAlert}
             />
           ) : (
             <Navigate to="/login" />

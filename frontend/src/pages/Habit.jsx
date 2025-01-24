@@ -228,7 +228,7 @@ const ImportanceIndicator = styled.div`
   }
 `;
 
-function Habit({ habits, setHabits, onHabitTracked }) {
+function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
@@ -253,11 +253,19 @@ function Habit({ habits, setHabits, onHabitTracked }) {
       );
 
       setHabits(habits.map((h) => (h._id === habit._id ? response.data : h)));
+      showAlert(
+        `${habit.name} ${
+          response.data.archived ? "archived" : "unarchived"
+        } successfully`,
+        "success"
+      );
+
       if (response.data.archived) {
-        navigate("/habits");
+        navigate("/");
       }
     } catch (error) {
       console.error("Error toggling archive status:", error);
+      showAlert("Failed to update habit archive status", "error");
     }
   };
 

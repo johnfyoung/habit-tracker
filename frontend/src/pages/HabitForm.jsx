@@ -104,12 +104,13 @@ function HabitForm({ addHabit }) {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    console.log(`submitting: ${e}`);
     e.preventDefault();
+    console.log(
+      `name: ${name}, frequency: ${frequency}, importance: ${importance}`
+    );
     await addHabit({ name, frequency, importance });
-    setName("");
-    setFrequency("daily");
-    setImportance(0);
-    navigate("/habits");
+    navigate("/");
   };
 
   return (
