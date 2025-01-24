@@ -35,6 +35,7 @@ router.post("/:id/toggle", auth, async (req, res) => {
   try {
     const { date } = req.body;
     const habit = await Habit.findOne({ _id: req.params.id, user: req.userId });
+    console.log(habit);
 
     if (!habit) {
       return res.status(404).json({ message: "Habit not found" });
@@ -47,7 +48,8 @@ router.post("/:id/toggle", auth, async (req, res) => {
     const isWithinFrequency = (completedDateString) => {
       // console.log(`Checking freq...${completedDateString}`);
       const completedDate = new Date(completedDateString);
-      console.log(`completedDate: ${completedDate}`);
+      // console.log(`completedDateString: ${completedDateString}`);
+      // console.log(`completedDate: ${completedDate}`);
       const timeDiff = trackDate - completedDate;
       const daysDiff = timeDiff / (1000 * 3600 * 24);
       // console.log(`daysDiff: ${daysDiff}`);

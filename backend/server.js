@@ -13,6 +13,14 @@ const PORT = process.env.PORT || 3001;
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/habit-tracker";
 
+// Add cache control middleware
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
