@@ -4,6 +4,7 @@ import {
   RouterProvider,
   Navigate,
   Outlet,
+  Link,
 } from "react-router-dom";
 import { api, authApi } from "./utils/api";
 import styled from "styled-components";
@@ -71,7 +72,7 @@ const Footer = styled.footer`
   align-items: center;
 `;
 
-const FooterButton = styled.button`
+const FooterLink = styled(Link)`
   background: none;
   border: none;
   color: white;
@@ -81,6 +82,7 @@ const FooterButton = styled.button`
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  text-decoration: none;
 `;
 
 function App() {
@@ -294,14 +296,6 @@ function AppContent({
           />
         </Banner>
       )}
-      {isMobile && (
-        <NavBar
-          isAuthenticated={isAuthenticated}
-          onLogout={handleLogout}
-          isMobile={isMobile}
-          $standalone={true}
-        />
-      )}
       {alert.message && <Alert message={alert.message} type={alert.type} />}
       <ContentWrapper>
         <Content>
@@ -310,18 +304,18 @@ function AppContent({
       </ContentWrapper>
       {isMobile && isAuthenticated && (
         <Footer>
-          <FooterButton onClick={() => navigate("/")}>
-            <span>Home</span>
-          </FooterButton>
-          <FooterButton onClick={() => navigate("/add")}>
+          <FooterLink to="/">
+            <span>Habits</span>
+          </FooterLink>
+          <FooterLink to="/add">
             <span>Add</span>
-          </FooterButton>
-          <FooterButton onClick={() => navigate("/archive")}>
+          </FooterLink>
+          <FooterLink to="/archive">
             <span>Archive</span>
-          </FooterButton>
-          <FooterButton onClick={() => navigate("/profile")}>
+          </FooterLink>
+          <FooterLink to="/profile">
             <span>Profile</span>
-          </FooterButton>
+          </FooterLink>
         </Footer>
       )}
     </AppContainer>

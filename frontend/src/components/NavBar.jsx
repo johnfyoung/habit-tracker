@@ -2,24 +2,34 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Clock from "./Clock";
+import MobileMenu from "./MobileMenu";
 
 const NavBarContainer = styled.nav`
   display: flex;
   justify-content: flex-end;
   align-items: center;
   color: white;
-  background-color: ${props => props.$standalone ? '#2196f3' : 'transparent'};
-  padding: ${props => props.$standalone ? '1rem' : '0'};
-`;
-
-const NavBarLeft = styled.div`
-  display: flex;
-  align-items: center;
+  background-color: ${(props) =>
+    props.$standalone ? "#2196f3" : "transparent"};
+  padding: ${(props) => (props.$standalone ? "1rem" : "0")};
 `;
 
 const NavBarRight = styled.div`
   display: flex;
   align-items: center;
+`;
+
+const NavButton = styled(Link)`
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 `;
 
 const HamburgerButton = styled.button`
@@ -28,53 +38,15 @@ const HamburgerButton = styled.button`
   color: white;
   font-size: 1.5rem;
   cursor: pointer;
-  z-index: 1001;
   margin-left: 1rem;
-`;
-
-const MobileMenu = styled.div`
-  position: fixed;
-  top: 0;
-  right: ${(props) => (props.$show ? "0" : "-100%")};
-  width: 100%;
-  height: 100vh;
-  background-color: #2196f3;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: right 0.3s ease-in-out;
-  z-index: 1000;
-`;
-
-const NavButton = styled(Link)`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  text-decoration: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-`;
-
-const LogoutButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  padding: 1rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
 `;
 
 function NavBar({ isAuthenticated, onLogout, isMobile, $standalone }) {
   const [showMenu, setShowMenu] = useState(false);
+
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+  };
 
   return (
     <NavBarContainer $standalone={$standalone}>
@@ -82,9 +54,14 @@ function NavBar({ isAuthenticated, onLogout, isMobile, $standalone }) {
         {isAuthenticated ? (
           <>
             {!isMobile && <Clock />}
-            <NavButton as="button" onClick={onLogout}>
-              Logout
-            </NavButton>
+            {!isMobile && (
+              <HamburgerButton onClick={toggleMenu}>☰</HamburgerButton>
+            )}
+            <MobileMenu
+              isOpen={showMenu}
+              onItemClick={() => setShowMenu(false)}
+              onLogout={onLogout}
+            />
           </>
         ) : (
           <>

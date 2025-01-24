@@ -26,7 +26,6 @@ const HorizontalCalendarWrapper = styled.div`
   position: sticky;
   top: 0;
   background: var(--light-bg-color);
-  z-index: 1;
   padding-bottom: 1rem;
 
   @media (prefers-color-scheme: dark) {
@@ -242,6 +241,7 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
 
   // Handle date selection in the horizontal calendar
   const handleDateSelect = (date) => {
+    console.log(`selected date: ${date}`);
     setSelectedDate(date);
   };
 
