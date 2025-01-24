@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { wasHabitCompletedOnThisDate } from "../utils/habit";
 import Calendar from "react-calendar";
 import styled from "styled-components";
@@ -65,14 +65,22 @@ const StyledCalendar = styled(Calendar)`
   }
 `;
 
-const BackButton = styled.button`
-  margin-bottom: 20px;
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
+const BackButton = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--light-primary-color);
+  text-decoration: none;
+  margin-bottom: 1rem;
+  font-weight: 500;
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--dark-primary-color);
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const HabitTitle = styled.h2`
@@ -322,8 +330,8 @@ function Habit({ habits, setHabits, onHabitTracked }) {
 
   return (
     <CalendarContainer>
-      <BackButton onClick={() => navigate("/habits")}>
-        Back to Habits
+      <BackButton to="/">
+        <span>←</span> Back to Habits
       </BackButton>
 
       <div style={{ display: "flex", alignItems: "center" }}>
