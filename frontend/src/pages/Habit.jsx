@@ -228,6 +228,12 @@ const ImportanceIndicator = styled.div`
   }
 `;
 
+const CheckboxGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
 function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -235,6 +241,7 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editImportance, setEditImportance] = useState(0);
+  const [allowComments, setAllowComments] = useState(false);
   const userLocale = navigator.language || "en-US"; // Fallback to en-US if browser locale not available
 
   const habit = habits.find((h) => h._id === id);
@@ -309,6 +316,7 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
   const handleEditClick = () => {
     setEditName(habit.name);
     setEditImportance(habit.importance);
+    setAllowComments(habit.allowComments || false);
     setIsEditing(true);
   };
 
@@ -322,6 +330,7 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
         {
           name: editName,
           importance: editImportance,
+          allowComments: allowComments,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -333,6 +342,17 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating habit:", error);
+    }
+  };
+
+  const handleEditChange = (e) => {
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    if (e.target.name === "allowComments") {
+      setAllowComments(value);
+    } else if (e.target.name === "importance") {
+      setEditImportance(parseInt(value));
+    } else {
+      setEditName(value);
     }
   };
 
@@ -357,7 +377,7 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
           <Input
             type="text"
             value={editName}
-            onChange={(e) => setEditName(e.target.value)}
+            onChange={handleEditChange}
             placeholder="Habit name"
             required
           />
@@ -370,10 +390,20 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
               min="-10"
               max="10"
               value={editImportance}
-              onChange={(e) => setEditImportance(parseInt(e.target.value))}
+              onChange={handleEditChange}
               importance={editImportance}
             />
           </SliderContainer>
+          <CheckboxGroup>
+            <Input
+              type="checkbox"
+              id="allowComments"
+              name="allowComments"
+              checked={allowComments}
+              onChange={handleEditChange}
+            />
+            <label htmlFor="allowComments">Allow comments when completing habit</label>
+          </CheckboxGroup>
           <Button type="submit">Save Changes</Button>
         </EditForm>
       )}

@@ -19,6 +19,7 @@ import NavBar from "./components/NavBar";
 import Alert from "./components/Alert";
 import GlobalStyles from "./GlobalStyles";
 import LoadingScreen from "./components/LoadingScreen";
+import Footer from "./components/Footer";
 import { useMediaQuery } from "react-responsive";
 
 const AppContainer = styled.div`
@@ -57,31 +58,6 @@ const ContentWrapper = styled.div`
 const Content = styled.main`
   width: 100%;
   max-width: 800px;
-`;
-
-const Footer = styled.footer`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #2196f3;
-  padding: 0.75rem;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-`;
-
-const FooterLink = styled(Link)`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-decoration: none;
 `;
 
 function App() {
@@ -303,22 +279,7 @@ function AppContent({
           <Outlet />
         </Content>
       </ContentWrapper>
-      {isMobile && isAuthenticated && (
-        <Footer>
-          <FooterLink to="/">
-            <span>Habits</span>
-          </FooterLink>
-          <FooterLink to="/add">
-            <span>Add</span>
-          </FooterLink>
-          <FooterLink to="/archive">
-            <span>Archive</span>
-          </FooterLink>
-          <FooterLink to="/profile">
-            <span>Profile</span>
-          </FooterLink>
-        </Footer>
-      )}
+      {isMobile && isAuthenticated && <Footer onLogout={handleLogout} />}
     </AppContainer>
   );
 }

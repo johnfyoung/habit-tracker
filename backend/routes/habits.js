@@ -18,6 +18,7 @@ router.post("/", auth, async (req, res) => {
     frequency: req.body.frequency,
     user: req.userId,
     importance: req.body.importance,
+    allowComments: req.body.allowComments || false,
   });
 
   try {
@@ -32,17 +33,16 @@ router.post("/", auth, async (req, res) => {
 // Add more routes for updating and deleting habits, using the auth middleware
 
 router.post("/:id/toggle", auth, async (req, res) => {
+  const { date, comment } = req.body;
+  const trackDate = new Date(date);
+
   try {
-    const { date } = req.body;
     const habit = await Habit.findOne({ _id: req.params.id, user: req.userId });
     console.log(habit);
 
     if (!habit) {
       return res.status(404).json({ message: "Habit not found" });
     }
-
-    const trackDate = new Date(date);
-    console.log(`trackDate: ${trackDate}`);
 
     // Function to check if a date is within the habit's frequency
     const isWithinFrequency = (completedDateString) => {
@@ -76,27 +76,47 @@ router.post("/:id/toggle", auth, async (req, res) => {
       }
     };
 
-    // Find the last completed date within the habit's time frame
+    // Check both completedDates and completions for existing entries
     const lastCompletedDate = habit.completedDates
       .filter(isWithinFrequency)
       .sort((a, b) => new Date(b) - new Date(a))[0];
 
-    console.log("lastCompletedDate", lastCompletedDate);
-    if (lastCompletedDate) {
-      // If a completed date was found within the time frame, remove it (untrack)
-      habit.completedDates = habit.completedDates.filter(
-        (d) => d !== lastCompletedDate
-      );
+    const lastCompletion = habit.completions
+      ?.filter((completion) => isWithinFrequency(completion.date))
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+    if (lastCompletedDate || lastCompletion) {
+      // If completed within timeframe, remove it (untrack)
+      if (lastCompletedDate) {
+        habit.completedDates = habit.completedDates.filter(
+          (d) => d.getTime() !== lastCompletedDate.getTime()
+        );
+      }
+      if (lastCompletion) {
+        habit.completions = habit.completions.filter(
+          (completion) =>
+            completion.date.getTime() !== lastCompletion.date.getTime()
+        );
+      }
     } else {
-      // If no completed date was found within the time frame, add the new date (track)
-      habit.completedDates.push(trackDate.toISOString());
+      // If not completed within timeframe, add new completion
+      if (habit.allowComments && comment) {
+        // If comments are enabled and provided, use completions
+        habit.completions.push({
+          date: trackDate,
+          comment: comment,
+        });
+      } else {
+        // Otherwise use the traditional completedDates
+        habit.completedDates.push(trackDate);
+      }
     }
 
     await habit.save();
     res.json(habit);
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: error.message });
+    console.error("Error toggling habit:", error);
+    res.status(500).json({ message: "Error toggling habit" });
   }
 });
 

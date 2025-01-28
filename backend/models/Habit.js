@@ -15,9 +15,22 @@ const habitSchema = new mongoose.Schema(
     completedDates: [
       {
         type: Date,
-        // get: function (date) {
-        //   return date ? date.toISOString().split("T")[0] : null;
-        // },
+      },
+    ],
+    allowComments: {
+      type: Boolean,
+      default: false,
+    },
+    completions: [
+      {
+        date: {
+          type: Date,
+          required: true,
+        },
+        comment: {
+          type: String,
+          default: "",
+        },
       },
     ],
     archived: {

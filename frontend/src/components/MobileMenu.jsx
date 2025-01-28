@@ -10,8 +10,8 @@ const MenuOverlay = styled.div`
   left: 0;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 9998;
-  opacity: ${(props) => (props.isOpen ? 1 : 0)};
-  visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
+  opacity: ${(props) => (props.$isOpen ? 1 : 0)};
+  visibility: ${(props) => (props.$isOpen ? "visible" : "hidden")};
   transition: opacity 0.3s ease, visibility 0.3s ease;
 `;
 
@@ -24,7 +24,7 @@ const MenuContainer = styled.div`
   background-color: #fff;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   transform: ${(props) =>
-    props.isOpen ? "translateX(0)" : "translateX(100%)"};
+    props.$isOpen ? "translateX(0)" : "translateX(100%)"};
   transition: transform 0.3s ease;
   z-index: 9999;
   display: flex;
@@ -57,8 +57,8 @@ const LogoutButton = styled.button`
 function MobileMenu({ isOpen, onItemClick, onLogout }) {
   return (
     <>
-      <MenuOverlay isOpen={isOpen} onClick={onItemClick} />
-      <MenuContainer isOpen={isOpen}>
+      <MenuOverlay $isOpen={isOpen} onClick={onItemClick} />
+      <MenuContainer $isOpen={isOpen}>
         <MenuItem to="/" onClick={onItemClick}>
           Habits
         </MenuItem>
