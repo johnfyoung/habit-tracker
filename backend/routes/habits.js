@@ -46,23 +46,31 @@ router.post("/:id/toggle", auth, async (req, res) => {
 
     // Function to check if a date is within the habit's frequency
     const isWithinFrequency = (completedDateString) => {
-      // console.log(`Checking freq...${completedDateString}`);
       const completedDate = new Date(completedDateString);
-      // console.log(`completedDateString: ${completedDateString}`);
-      // console.log(`completedDate: ${completedDate}`);
-      const timeDiff = trackDate - completedDate;
-      const daysDiff = timeDiff / (1000 * 3600 * 24);
-      // console.log(`daysDiff: ${daysDiff}`);
-      // console.log(`timeDiff: ${timeDiff}`);
+
+      // Set trackDate to start of day (midnight)
+      const trackDate = new Date(date);
+      trackDate.setHours(0, 0, 0, 0);
+
+      // Set completedDate to start of its day
+      completedDate.setHours(0, 0, 0, 0);
 
       switch (habit.frequency) {
         case "daily":
-          return daysDiff < 1 && daysDiff >= 0;
+          // For daily, check if it's the same calendar day
+          return trackDate.getTime() === completedDate.getTime();
+
         case "weekly":
+          const timeDiff = trackDate - completedDate;
+          const daysDiff = timeDiff / (1000 * 3600 * 24);
           return daysDiff < 7 && daysDiff >= 0;
+
         case "monthly":
-          // Approximate a month as 30 days
-          return daysDiff < 30 && daysDiff >= 0;
+          return (
+            trackDate.getFullYear() === completedDate.getFullYear() &&
+            trackDate.getMonth() === completedDate.getMonth()
+          );
+
         default:
           return false;
       }
