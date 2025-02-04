@@ -75,7 +75,7 @@ function Login({ onLogin }) {
     e.preventDefault();
     try {
       const response = await api.post("/auth/login", {
-        username,
+        username: username.toLowerCase().trim(),
         password,
       });
       console.log("Login response:", response.data); // Add this line for debugging
