@@ -102,7 +102,7 @@ function Login({ onLogin }) {
           type="text"
           placeholder="Username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => setUsername(e.target.value.toLowerCase().trim())}
           required
         />
         <Input
