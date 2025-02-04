@@ -115,16 +115,18 @@ function App() {
     try {
       const today = localDate || new Date();
       const todayStr = today.toISOString();
-      console.log(`Toggling habit ${habitId} for date ${todayStr}`);
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      console.log(
+        `Toggling habit ${habitId} for date ${todayStr} in timezone ${timeZone}`
+      );
       const response = await authApi.post(`/habits/${habitId}/toggle`, {
-        date: todayStr,
+        isoDate: todayStr,
+        timeZone: timeZone,
       });
       console.log("Habit toggled:", response.data);
-      console.log("Habits before update:", habits);
       setHabits(
         habits.map((habit) => (habit._id === habitId ? response.data : habit))
       );
-      console.log("Habits after update:", habits);
     } catch (error) {
       console.error("Error toggling habit:", error);
     }

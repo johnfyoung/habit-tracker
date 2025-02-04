@@ -33,9 +33,10 @@ router.post("/", auth, async (req, res) => {
 // Add more routes for updating and deleting habits, using the auth middleware
 
 router.post("/:id/toggle", auth, async (req, res) => {
-  const { date, comment } = req.body;
-  const trackDate = new Date(date);
+  const { isoDate, comment, timeZone } = req.body;
+  const trackDate = new Date(isoDate);
 
+  console.log(req.body);
   try {
     const habit = await Habit.findOne({ _id: req.params.id, user: req.userId });
     console.log(habit);
@@ -45,30 +46,40 @@ router.post("/:id/toggle", auth, async (req, res) => {
     }
 
     // Function to check if a date is within the habit's frequency
-    const isWithinFrequency = (completedDateString) => {
-      const completedDate = new Date(completedDateString);
+    const isWithinFrequency = (completionDate, timeZone) => {
+      const isoCompletedDate = new Date(completionDate);
 
-      // Set trackDate to start of day (midnight)
-      const trackDate = new Date(date);
-      trackDate.setHours(0, 0, 0, 0);
+      // Convert completedDate to user's local time
+      const localCompletedDate = new Date(
+        isoCompletedDate.toLocaleString("en-US", { timeZone })
+      );
 
-      // Set completedDate to start of its day
-      completedDate.setHours(0, 0, 0, 0);
+      // Set trackDate to start of day (midnight) in local time
+      const localTrackDate = new Date(
+        trackDate.toLocaleString("en-US", {
+          timeZone,
+        })
+      );
+      localTrackDate.setHours(0, 0, 0, 0);
+
+      // Set completedDate to start of its local day
+      localCompletedDate.setHours(0, 0, 0, 0);
 
       switch (habit.frequency) {
         case "daily":
-          // For daily, check if it's the same calendar day
-          return trackDate.getTime() === completedDate.getTime();
+          // For daily, check if it's the same calendar day in local time
+          return localTrackDate.getTime() === localCompletedDate.getTime();
 
         case "weekly":
-          const timeDiff = trackDate - completedDate;
+          // to check if it's the same week in local time, not with the last 7 days
+          const timeDiff = localTrackDate - localCompletedDate;
           const daysDiff = timeDiff / (1000 * 3600 * 24);
           return daysDiff < 7 && daysDiff >= 0;
 
         case "monthly":
           return (
-            trackDate.getFullYear() === completedDate.getFullYear() &&
-            trackDate.getMonth() === completedDate.getMonth()
+            trackDate.getFullYear() === localCompletedDate.getFullYear() &&
+            trackDate.getMonth() === localCompletedDate.getMonth()
           );
 
         default:
@@ -78,11 +89,11 @@ router.post("/:id/toggle", auth, async (req, res) => {
 
     // Check both completedDates and completions for existing entries
     const lastCompletedDate = habit.completedDates
-      .filter(isWithinFrequency)
+      .filter((d) => isWithinFrequency(d, timeZone))
       .sort((a, b) => new Date(b) - new Date(a))[0];
 
     const lastCompletion = habit.completions
-      ?.filter((completion) => isWithinFrequency(completion.date))
+      ?.filter((completion) => isWithinFrequency(completion.date, timeZone))
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
     if (lastCompletedDate || lastCompletion) {

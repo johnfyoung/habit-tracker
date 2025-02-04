@@ -302,6 +302,7 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
       if (now.toDateString() === date.toDateString()) {
         date = now;
       } else {
+        // since we are toggling a date in the past, we need to set a generaic time
         date.setHours(12, 0, 0, 0);
       }
 
@@ -346,7 +347,8 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
   };
 
   const handleEditChange = (e) => {
-    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    const value =
+      e.target.type === "checkbox" ? e.target.checked : e.target.value;
     if (e.target.name === "allowComments") {
       setAllowComments(value);
     } else if (e.target.name === "importance") {
@@ -402,7 +404,9 @@ function Habit({ habits, setHabits, onHabitTracked, showAlert }) {
               checked={allowComments}
               onChange={handleEditChange}
             />
-            <label htmlFor="allowComments">Allow comments when completing habit</label>
+            <label htmlFor="allowComments">
+              Allow comments when completing habit
+            </label>
           </CheckboxGroup>
           <Button type="submit">Save Changes</Button>
         </EditForm>

@@ -12,13 +12,24 @@ export const isHabitCompleted = (habit, localDate) => {
 
   switch (habit.frequency.toLowerCase()) {
     case "daily":
-      return habit.completedDates.some((date) => {
-        // const dateLocal = convertUTCDateToLocalDate(new Date(date));
-        const dateLocal = new Date(date);
-        const dateLocalString = dateLocal.toLocaleDateString();
+      if (habit.allowComments) {
+        return habit.completions.some((completion) => {
+          // const dateLocal = convertUTCDateToLocalDate(new Date(date));
+          const dateLocal = new Date(completion.date);
+          const dateLocalString = dateLocal.toLocaleDateString();
 
-        return dateLocalString === currentLocalDateString;
-      });
+          return dateLocalString === currentLocalDateString;
+        });
+      } else {
+        return habit.completedDates.some((date) => {
+          // const dateLocal = convertUTCDateToLocalDate(new Date(date));
+          const dateLocal = new Date(date);
+          const dateLocalString = dateLocal.toLocaleDateString();
+
+          return dateLocalString === currentLocalDateString;
+        });
+      }
+
     case "weekly":
       const weekStartLocal = new Date(
         currentLocalDate.getFullYear(),
