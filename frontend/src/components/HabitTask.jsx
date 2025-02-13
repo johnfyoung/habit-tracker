@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { getLastCompletedDate } from "../utils/habit";
 
 const HabitContainer = styled.div`
   display: flex;
@@ -179,6 +180,8 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const commentFormRef = useRef(null);
 
+  // handle clicking the checkmark to toggle the habit
+  // if the habit supports comments, a comment form will show
   const handleClick = async () => {
     if (habit.allowComments && !isCompleted) {
       console.log(`Toggling habit ${habit._id} for date ${selectedDate}`);
@@ -188,6 +191,7 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
     }
   };
 
+  // handles submitting the comment form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -198,6 +202,7 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
     setComment("");
   };
 
+  // handels cancelling the comment form
   const handleCancel = () => {
     setShowCommentForm(false);
     setComment("");
@@ -220,36 +225,47 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
     };
   }, []);
 
-  const lastCompletion =
+  // Looking to see if the task was completed on the currently selected date
+  // some habits support comments...this feature was added later so now
+  // some completions are in a different array
+  // right now this excludes habits that are not daily
+  const completedWithCommentOnDate =
     habit.completions
       ?.filter((completion) => {
         const completionDate = new Date(completion.date);
-        const today = new Date();
+        const today =
+          habit.frequency === "daily" ? new Date(selectedDate) : new Date();
         return completionDate.toDateString() === today.toDateString();
       })
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
 
-  const lastDateCompletion =
+  const completedOnDate =
     habit.completedDates
       ?.filter((completedDate) => {
         const completionDate = new Date(completedDate);
-        const today = new Date();
+        const today =
+          habit.frequency === "daily" ? new Date(selectedDate) : new Date();
         return completionDate.toDateString() === today.toDateString();
       })
       .sort((a, b) => new Date(b) - new Date(a))[0] || null;
 
-  const completed = lastCompletion?.date || lastDateCompletion;
+  let completed = completedWithCommentOnDate?.date || completedOnDate;
+  if (habit.frequency !== "daily") {
+    const lastCompletedDate = getLastCompletedDate(habit);
+    console.log(lastCompletedDate);
+    completed = lastCompletedDate || completed;
+  }
   return (
     <HabitContainer $importance={habit.importance}>
       <HabitInfo>
         <HabitName to={`/habit/${habit._id}`}>{habit.name}</HabitName>
         <HabitDetails>
-          {isCompleted && lastCompletion?.comment && (
-            <div>Comment: {lastCompletion.comment}</div>
+          {isCompleted && completedWithCommentOnDate?.comment && (
+            <div>Comment: {completedWithCommentOnDate.comment}</div>
           )}
           {isCompleted && completed && (
             <CompletionDate>
-              {format(new Date(completed), "h:mm a")}
+              {format(new Date(completed), "MMM d h:mm a")}
             </CompletionDate>
           )}
         </HabitDetails>
