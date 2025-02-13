@@ -154,6 +154,7 @@ router.put("/:id", auth, async (req, res) => {
 
     habit.name = req.body.name;
     habit.importance = req.body.importance;
+    habit.allowComments = req.body.allowComments || false;
 
     const updatedHabit = await habit.save();
     res.json(updatedHabit);

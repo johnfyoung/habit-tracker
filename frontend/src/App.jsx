@@ -111,17 +111,18 @@ function App() {
     }
   };
 
-  const handleHabitTracked = async (habitId, localDate) => {
+  const handleHabitTracked = async (habitId, localDate, comment) => {
     try {
       const today = localDate || new Date();
       const todayStr = today.toISOString();
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       console.log(
-        `Toggling habit ${habitId} for date ${todayStr} in timezone ${timeZone}`
+        `Toggling habit ${habitId} for date ${todayStr} in timezone ${timeZone} with comment ${comment}`
       );
       const response = await authApi.post(`/habits/${habitId}/toggle`, {
         isoDate: todayStr,
         timeZone: timeZone,
+        comment: comment,
       });
       console.log("Habit toggled:", response.data);
       setHabits(

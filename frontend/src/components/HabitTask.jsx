@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 
 const HabitContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: 0.3rem 1rem;
   margin-bottom: 1rem;
   background: white;
   border-radius: 8px;
@@ -51,6 +52,16 @@ const HabitName = styled(Link)`
 const HabitDetails = styled.div`
   font-size: 0.9rem;
   color: #666;
+  margin-top: 0.25rem;
+
+  @media (prefers-color-scheme: dark) {
+    color: #999;
+  }
+`;
+
+const CompletionDate = styled.div`
+  font-size: 0.8rem;
+  color: #757575;
   margin-top: 0.25rem;
 
   @media (prefers-color-scheme: dark) {
@@ -149,13 +160,28 @@ const SubmitButton = styled.button`
   }
 `;
 
+const CancelButton = styled.button`
+  background: #f44336; /* Red color for cancel */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background: #d32f2f;
+  }
+`;
+
 function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const commentFormRef = useRef(null);
 
   const handleClick = async () => {
     if (habit.allowComments && !isCompleted) {
+      console.log(`Toggling habit ${habit._id} for date ${selectedDate}`);
       setShowCommentForm(true);
     } else {
       await onHabitTracked(habit._id, selectedDate);
@@ -165,20 +191,54 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await onHabitTracked(habit._id, selectedDate, comment);
+    console.log(`Submitting comment: ${comment}`);
+    await onHabitTracked(habit._id, comment);
     setIsSubmitting(false);
     setShowCommentForm(false);
     setComment("");
   };
 
-  const lastCompletion = habit.completions
-    ?.filter((completion) => {
-      const completionDate = new Date(completion.date);
-      const today = new Date();
-      return completionDate.toDateString() === today.toDateString();
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  const handleCancel = () => {
+    setShowCommentForm(false);
+    setComment("");
+  };
 
+  // Close comment form when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        commentFormRef.current &&
+        !commentFormRef.current.contains(event.target)
+      ) {
+        handleCancel();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const lastCompletion =
+    habit.completions
+      ?.filter((completion) => {
+        const completionDate = new Date(completion.date);
+        const today = new Date();
+        return completionDate.toDateString() === today.toDateString();
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
+
+  const lastDateCompletion =
+    habit.completedDates
+      ?.filter((completedDate) => {
+        const completionDate = new Date(completedDate);
+        const today = new Date();
+        return completionDate.toDateString() === today.toDateString();
+      })
+      .sort((a, b) => new Date(b) - new Date(a))[0] || null;
+
+  const completed = lastCompletion?.date || lastDateCompletion;
   return (
     <HabitContainer $importance={habit.importance}>
       <HabitInfo>
@@ -187,8 +247,17 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
           {isCompleted && lastCompletion?.comment && (
             <div>Comment: {lastCompletion.comment}</div>
           )}
+          {isCompleted && completed && (
+            <CompletionDate>
+              {format(new Date(completed), "h:mm a")}
+            </CompletionDate>
+          )}
         </HabitDetails>
-        <CommentForm $show={+showCommentForm} onSubmit={handleSubmit}>
+        <CommentForm
+          ref={commentFormRef}
+          $show={showCommentForm}
+          onSubmit={handleSubmit}
+        >
           <CommentInput
             type="text"
             value={comment}
@@ -199,6 +268,9 @@ function HabitTask({ habit, onHabitTracked, isCompleted, selectedDate }) {
           <SubmitButton type="submit" disabled={isSubmitting}>
             Save
           </SubmitButton>
+          <CancelButton type="button" onClick={handleCancel}>
+            Cancel
+          </CancelButton>
         </CommentForm>
       </HabitInfo>
       <CheckButton

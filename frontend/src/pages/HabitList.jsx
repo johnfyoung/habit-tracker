@@ -246,11 +246,11 @@ function HabitList({ habits, setHabits, onHabitTracked }) {
   };
 
   // Toggle habit completion using the selected date
-  const toggleHabitCompletion = async (habitId) => {
+  const toggleHabitCompletion = async (habitId, comment) => {
     try {
       const date = selectedDate; // Use the selected date
       // Call your API or function to toggle the habit completion
-      await onHabitTracked(habitId, date);
+      await onHabitTracked(habitId, date, comment);
     } catch (error) {
       console.error("Error toggling habit completion:", error);
     }
